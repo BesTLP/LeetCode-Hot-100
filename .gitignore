@@ -1,0 +1,26 @@
+# 编译输出目录
+bin/
+bin-int/
+
+# 临时文件
+*.obj
+*.o
+*.lo
+*.la
+*.suo
+*.user
+*.sln
+*.vcxproj
+
+# 编译器生成的中间文件
+*.exe
+*.dll
+*.lib
+*.pdb
+
+# Visual Studio生成的文件
+.vs/
+.vscode/
+
+# Premake生成的文件
+*.premake5
