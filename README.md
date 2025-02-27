@@ -93,3 +93,98 @@ std::string BrowserHistory::forward(int steps)
 
 ```
 
+# 2025/2/27 [单词搜索](https://leetcode.cn/problems/word-search/description/)
+
+给定一个 `m x n` 二维字符网格 `board` 和一个字符串单词 `word` 。如果 `word` 存在于网格中，返回 `true` ；否则，返回 `false` 
+
+单词必须按照字母顺序，通过相邻的单元格内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母不允许被重复使用。
+
+就是比较简单的使用`DFS`就可以解决的问题，棋盘上可以向四个方向移动
+
+```c++
+// 顺序为UP RIGHT LEFT DOWN
+int MoveX[4] = { -1, 0, 0, 1 };
+int MoveY[4] = { 0, 1, -1, 0 };
+```
+
+但是这道题我们可以提前做一些优化，比如如果`board`里面根本都没有`word`里面的字符或者字符数量更少，那么就不用进行后续的操作了。
+
+注意一下，下面的判断条件需要分开写，因为如果`i`和`j`已经超出了`board`的范围，就会报数组越界错误。
+
+```c++
+if (i < 0 || i >= board.size() || j < 0 || j >= board[0].size())
+    return false;
+
+if (visited[i][j] || board[i][j] != word[index])
+    return false;
+
+if (index == word.size() - 1) // 最后一个元素也能对的上
+    return true;
+```
+
+```c++
+#include "vector"
+#include "iostream"
+#include "string"
+
+const int maxn = 1e3;
+class Solution
+{
+public:
+
+    bool exist(std::vector<std::vector<char>>& board, std::string word)
+    {
+        // 重置 visited 数组
+        memset(visited, false, sizeof(visited));
+
+        int charCount[256] = { 0 };
+        for (int i = 0; i < board.size(); i++)
+            for (int j = 0; j < board[i].size(); j++)
+                charCount[board[i][j]]++;
+
+        for (int i = 0; i < word.size(); i++)
+        {
+            char c = word[i];
+            charCount[c]--;
+            if (charCount[c] < 0)
+                return false;
+        }
+
+        std::vector<std::vector<bool>> visited(board.size(), std::vector<bool>(board[0].size(), false));
+        for (int i = 0; i < board.size(); i++)
+            for (int j = 0; j < board[i].size(); j++)
+                if (board[i][j] - word[0] == 0)
+                    if (Move(board, word, i, j, 0))
+                        return true;
+
+        return false;
+    }
+
+    bool Move(std::vector<std::vector<char>>& board, std::string& word, int i, int j, int index)
+    {
+        if (i < 0 || i >= board.size() || j < 0 || j >= board[0].size())
+            return false;
+
+        if (visited[i][j] || board[i][j] != word[index])
+            return false;
+
+        if (index == word.size() - 1) // 最后一个元素也能对的上
+            return true;
+
+        visited[i][j] = true;
+
+        int MoveX[4] = { -1, 0, 0, 1 };
+        int MoveY[4] = { 0, 1, -1, 0 };
+        for (int ArrayIndex = 0; ArrayIndex < 4; ArrayIndex++)
+            if (Move(board, word, i + MoveX[ArrayIndex], j + MoveY[ArrayIndex], index + 1))
+                return true;
+
+        visited[i][j] = false;
+        return false;
+    }
+
+public:
+    bool visited[maxn][maxn] = { false };
+};
+```
+

@@ -47,4 +47,3 @@ std::string BrowserHistory::forward(int steps)
 
 	return m_NowUrlPointer->c_str();
 }
-
