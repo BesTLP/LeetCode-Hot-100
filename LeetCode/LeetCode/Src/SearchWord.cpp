@@ -9,13 +9,21 @@ public:
 
     bool exist(std::vector<std::vector<char>>& board, std::string word)
     {
-        // ÖØÖÃ visited Êý×é
-        memset(visited, false, sizeof(visited));
 
         int charCount[256] = { 0 };
+        std::vector<std::pair<int, int> > StartLocation;
         for (int i = 0; i < board.size(); i++)
+        {
             for (int j = 0; j < board[i].size(); j++)
+            {
                 charCount[board[i][j]]++;
+                if (board[i][j] - word[0] == 0)
+                {
+                    StartLocation.push_back(std::make_pair(i, j));
+                }
+            }
+        }
+
 
         for (int i = 0; i < word.size(); i++)
         {
@@ -25,12 +33,14 @@ public:
                 return false;
         }
 
-        std::vector<std::vector<bool>> visited(board.size(), std::vector<bool>(board[0].size(), false));
-        for (int i = 0; i < board.size(); i++)
-            for (int j = 0; j < board[i].size(); j++)
-                if (board[i][j] - word[0] == 0)
-                    if (Move(board, word, i, j, 0))
-                        return true;
+        for (auto location : StartLocation)
+        {
+            if (Move(board, word, location.first, location.second, 0))
+            {
+                return true;
+            }
+        }
+
 
         return false;
     }
@@ -57,7 +67,7 @@ public:
         visited[i][j] = false;
         return false;
     }
-
 public:
     bool visited[maxn][maxn] = { false };
+
 };

@@ -188,3 +188,220 @@ public:
 };
 ```
 
+
+
+# 2025/3/1 [两数相加](https://leetcode.cn/problems/add-two-numbers/description/)
+
+这个题目要求我们实现的是两个链表表示的数字相加的问题。
+
+每个链表节点代表一个数字的一位，链表的<font color='87CEFA'>**头节点**</font>表示数字的<font color='87CEFA'>**最低位**</font>，链表的<font color='87CEFA'>**尾节点**</font>表示数字的<font color='87CEFA'>**最高位**</font>。
+
+我们需要将两个链表表示的数字相加，并返回一个新的链表表示的结果。
+
+其实类似于<font color='87CEFA'>**整数的相加减**</font>，我们只需要保证是<font color='87CEFA'>**从低位开始相加**</font>，处理好进位即可
+
+```c++
+    // 获取进位
+    int Temp = (x + y + Temp) / 10;
+    // 获取个位数
+    int Value = (x + y + Temp) % 10;
+```
+
+
+
+注意循环的条件，可能会忘记如果还有进位的话依然需要构建一个节点来存储进位
+
+```c++
+    // 循环条件：l1或l2不为空，或者Temp不为0（即还有进位需要处理）
+    while (l1 || l2 || Temp)
+```
+
+注意，只有当链表不为`nullptr`的时候，才能执行`Pointer->next`操作，否则会报错
+
+```c++
+    l1 = l1 != nullptr? l1->next : nullptr;
+    l2 = l2 != nullptr? l2->next : nullptr;
+```
+
+
+
+```c++
+    #include "iostream"
+    #include "cstdio"
+
+    struct ListNode 
+    {
+        int val;
+        ListNode* next;
+        ListNode() : val(0), next(nullptr) {}
+        ListNode(int x) : val(x), next(nullptr) {}
+        ListNode(int x, ListNode* next) : val(x), next(next) {}
+    };
+    class Solution 
+    {
+    public:
+        ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) 
+        {
+            ListNode* PreviousNode = nullptr;
+            ListNode* FirstNode = nullptr;
+            int Temp = 0; // 进位
+
+            while (l1 || l2 || Temp)
+            {
+                int x = l1 != nullptr? l1->val : 0;
+                int y = l2 != nullptr? l2->val : 0;
+
+                if (FirstNode == nullptr)
+                {
+                    FirstNode = new ListNode();
+                    FirstNode->val = (x + y + Temp) % 10;
+                    PreviousNode = FirstNode;
+                }
+                else
+                {
+                    ListNode* CurrentNode = new ListNode();
+                    CurrentNode->val = (x + y + Temp) % 10;
+                    PreviousNode->next = CurrentNode;
+                    PreviousNode = CurrentNode;
+                }
+                Temp = (x + y + Temp) / 10; // 获取到进位
+                l1 = l1 != nullptr? l1->next : nullptr;
+                l2 = l2 != nullptr? l2->next : nullptr;
+            }
+            return FirstNode;
+        }
+    };
+```
+
+
+
+# 2025/3/1 [完全平方数](https://leetcode.cn/problems/perfect-squares/)
+
+
+
+完全平方数：可以由一个整数的平方获取的整数，比如
+$$
+1 = 1 * 1\\
+4 = 2 * 2\\
+9 = 3 * 3
+$$
+这道题需要用动态规划的形式来做，有的人可能想要使用贪心来做，比如
+$$
+12 = 9 + 1 + 1 + 1
+$$
+但实际上正确答案是
+$$
+12 = 4 + 4 + 4
+$$
+使用贪心的完全平方数数量是`4`，但是正确答案是`3`
+
+## 状态转移方程
+
+
+
+先来看一个例子，`dp[n]`代表的是组成当前数`n` 需要的最少的完全平方数的个数
+$$
+if(dp[4] > dp[4 - 1 * 1])\\
+dp[4] = dp[4 - 1 * 1];\\
+if(dp[4] > dp[4 - 2 * 2])\\
+dp[4] = dp[4 - 2 * 2];
+$$
+因为我们每一次相加都是加的完全平方数，也就是跨度一定是`j * j`（`j`代表正整数）
+
+所以求取`dp[4]`的时候，只需要找到`dp[3]`和`dp[0]`谁最小即可。
+
+扩展到所有的`dp[n]`，只需要找到所有的`dp[n - j * j]`谁最小即可(其中`j <= sqrt(n)`)
+
+
+
+```c++
+    int numSquares(int n)
+    {
+        // 动态规划的方式来求，得正确的答案
+        // 12 = 4 + 4 + 4 (3)
+        std::vector<int> dp(n + 1, INT_MAX);
+        dp[0] = 0;
+        
+        for (int i = 1; i <= n; i++)
+        {
+            for (int j = 1; j * j <= i; j++)
+            {
+                dp[i] = std::min(dp[i], dp[i - j * j] + 1);
+            }
+        }
+        return dp[n];
+    }
+
+    int numSquares(int n)
+    {
+        // 贪心的方式来求，得不到正确的答案
+        // 12 = 9 + 1 + 1 + 1 (4)
+        std::vector<int> SquareNumber;
+        for (int i = 1; i <= std::sqrt(n); i++)
+        {
+            SquareNumber.push_back(std::pow(i, 2));
+        }
+
+        int index = SquareNumber.size() - 1;
+        int cnt = 0;
+        while (n != 0)
+        {
+            if (n - SquareNumber[index] >= 0)
+            {
+                n -= SquareNumber[index];
+                cnt++;
+            }
+            else
+            {
+                index--;
+            }
+        }
+
+        return cnt;
+    }
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
