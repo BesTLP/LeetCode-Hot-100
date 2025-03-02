@@ -363,43 +363,203 @@ $$
 
 
 
+# 2025/3/2 [整数反转](https://leetcode.cn/problems/reverse-integer/description/)
+
+
+
+> 执行用时分布：0ms
+
+
+
+给你一个 32 位的有符号整数 `x` ，返回将 `x` 中的数字部分反转后的结果。
+
+如果反转后整数超过 32 位的有符号整数的范围 `[−231, 231 − 1]` ，就返回 0。
+
+**假设环境不允许存储 64 位整数（有符号或无符号）。**
+
+
+
+>虽然很明显偷偷存储也是可以的，但我们还是老实一点，一共有三个核心步骤
+
+1.一直加最后一位，并且将之前的结果都✖10即可（有点类似于进制转换）
+
+```c++
+sum = sum * 10 + x % 10;
+```
+
+2.需要<font color='87CEFA'>**去掉前导零**</font>
+
+```c++
+// 去除前导零
+while (x % 10 == 0)
+    x /= 10;
+```
+
+3.判断结果是否超出范围
+
+```c++
+// [-2147483648, 2147483647] // 不能超过这个范围
+if (sum < INT_MIN / 10 || (sum == INT_MIN / 10 && x % 10 > 8))
+{
+    // 比如是否是-214748365	如果是-214748364那么还需要判断最后以为是否大于8
+    return 0;
+}
+if (sum > INT_MAX / 10 || (sum == INT_MAX / 10 && x % 10 > 7))
+{
+    // 比如是否是214748365	如果是214748364那么还需要判断最后一位是否大于7
+    return 0;
+}
+```
 
 
 
 
 
+```c++
+#include "vector"
+#include "iostream"
+class Solution 
+{
+public:
+    static int reverse(int x)
+    {
+        if (x == 0)
+        {
+            return 0;
+        }
+        // 去除前导零
+        while (x % 10 == 0)
+            x /= 10;
+
+        int sum = 0;
+        while (x != 0)
+        {
+            // [-2147483648, 2147483647] // 不能超过这个范围
+            if (sum < INT_MIN / 10 || (sum == INT_MIN / 10 && x % 10 > 8))
+            {
+                return 0;
+            }
+            if (sum > INT_MAX / 10 || (sum == INT_MAX / 10 && x % 10 > 7))
+            {
+                return 0;
+            }
+            sum = sum * 10 + x % 10;
+            x  = x / 10;
+        }
+        return sum;
+    }
+};
+```
 
 
 
 
 
+# 2025/3/2 [字符串转换整数 (atoi)](https://leetcode.cn/problems/string-to-integer-atoi/)
+
+>执行用时分布: 0ms
+
+无论是`去除前导零`
+
+```c++
+        // 去除前导零
+        while (s[index] == '0' && index < s.size())
+            index++; // 使用index下标，进一步节约erase耗时
+```
+
+还是每一步的`整数乘法`
+
+```c++
+            sum = sum * 10 + flag * (s[index] - '0');
+```
 
 
 
+还是最后判断`是否在整数范围之内`
+
+```c++
+        if (sum < INT_MIN / 10 || (sum == INT_MIN / 10 && s[index] - '0' > 8))
+        {
+            sum = INT_MIN;
+            break;
+        }
+        if (sum > INT_MAX / 10 || (sum == INT_MAX / 10 && s[index] - '0' > 7))
+        {
+            sum = INT_MAX;
+            break;
+        }
+```
 
 
 
+另外一个关键点在于，不能写成
+
+```c++
+s[index] == " ";
+```
+
+C++中，字符串字面量 `" "` 是 `const char*`，但 `s[index]` 是 `char` 类型。
+
+正确的写法是 `s[0] == ' '`，使用单引号表示字符。
+
+```c++
+s[index] == ' '
+```
 
 
 
+```c++
+#include "string"
+#include "iostream"
+#include "cstdio"
+class Solution 
+{
+public:
+    int myAtoi(std::string s)
+    {
+        int index = 0;
+        // 空格全清
+        while (s[index] == ' ') // 注意这里不能使用" "，而是应该使用' '
+            index++;
+
+        int flag = 1;
+        if (s[index] == '-' || s[index] == '+')
+        {
+            // 负数
+            flag = s[index] == '-'? -1 : 1;
+            index++;
+        }
+
+        // 去除前导零
+        while (s[index] == '0' && index < s.size())
+            index++;
 
 
+        if (!(s[index] >= '0' && s[index] <= '9') || index == s.size()) return 0;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        int sum = 0;
+        for (; index < s.size(); index++)
+        {
+            if (!(s[index] >= '0' && s[index] <= '9'))
+            {
+                break;
+            }
+            if (sum < INT_MIN / 10 || (sum == INT_MIN / 10 && s[index] - '0' > 8))
+            {
+                sum = INT_MIN;
+                break;
+            }
+            if (sum > INT_MAX / 10 || (sum == INT_MAX / 10 && s[index] - '0' > 7))
+            {
+                sum = INT_MAX;
+                break;
+            }
+            sum = sum * 10 + flag * (s[index] - '0');
+        }
+        return sum;
+    }
+};
+```
 
 
 
