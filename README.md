@@ -563,6 +563,196 @@ public:
 
 # 2025/3/4 [删除链表的倒数第 N 个结点](https://leetcode.cn/problems/remove-nth-node-from-end-of-list/description/)
 
+>执行用时：0ms
+
+最容易想到的思路应该是，先遍历一遍链表，获取到链表的节点数之后，`n - i + 1`就是你要删除的节点
+
+但是如何进行一次遍历就能找到需要删除的节点呢？
+
+我们在这里引入快慢指针，快指针永远比慢指针多走`n`步，所以当快指针走到`nullptr`的时候，慢指针就会刚好走到要删除的第`n`个节点
+
+```c++
+ListNode* NextN = head;
+ListNode* Current = head;
+
+for (int i = 1; i <= n; i++)
+    NextN = NextN->next;
+```
+
+当然你也可以考虑判断快指针的`next`是否是`nullptr`如果是`nullptr`的话，说明快指针的`next`就是要删除的节点，这样做可以不用记录`LastNode`上一个搜索到的节点
+
+```c++
+    ListNode* Last = Current;
+    while (NextN)
+    {
+        NextN = NextN->next;
+        Last = Current;
+        Current = Current->next;
+    }
+
+    Last->next = Current->next;
+    delete Current;
+
+	// 我们这里做了一些改变，下面的方式可以不用记录上一个搜索到的节点
+    while (NextN->next)
+    {
+        NextN = NextN->next;
+        Current = Current->next;
+    }
+
+    ListNode* ToDelete = Current->next;
+    Current->next = Current->next->next;
+    delete ToDelete;
+```
+
+```c++
+#include "iostream"
+// Definition for singly-linked list.
+struct ListNode
+{
+    int val;
+    ListNode *next;
+    ListNode() : val(0), next(nullptr) {}
+    ListNode(int x) : val(x), next(nullptr) {}
+    ListNode(int x, ListNode *next) : val(x), next(next) {}
+};
+
+class Solution 
+{
+public:
+    ListNode* removeNthFromEnd(ListNode* head, int n) 
+    {
+        if ((!head->next && n >= 1) || !head )
+        {
+            // 如果只有一个节点, 或者根本没有节点
+            head = nullptr;
+            return head;    
+        }
+
+        ListNode* NextN = head; // 快指针
+        ListNode* Current = head; // 慢指针
+        for (int i = 1; i <= n; i++)
+            NextN = NextN->next;
+
+        if (NextN == nullptr)
+        {
+            Current = head;
+            if(head != nullptr)
+                head = head->next;
+
+            delete Current;
+
+            return head;
+        }
+
+        // 我们这里做了一些改变
+        while (NextN->next)
+        {
+            NextN = NextN->next;
+            Current = Current->next;
+        }
+
+        ListNode* ToDelete = Current->next;
+        Current->next = Current->next->next;
+        delete ToDelete;
+
+        return head;
+    }
+};
+```
+
 # 2025/3/4 [跳跃游戏](https://leetcode.cn/problems/jump-game/description/)
 
+我们只需要记录当我们遍历到数组的第`i`个元素的时候，我们实际上能够走到的位置是`nums[i] + i`
+
+```c++
+nums = [2, 3, 1, 1, 5]
+```
+
+我们遍历到第1个元素的时候，能走到的最远是nums[0] + 0 = 2，也就是下标为2的元素，是第三个元素
+
+我们遍历到第2个元素的时候，能走到的最远是nums[1] + 1 = 4，也就是下标为4的元素，是第五个元素，已经到达了数组末尾，返回true
+
+```c++
+nums = [3, 2, 1, 0, 4]
+```
+
+我们遍历到第1个元素的时候，能走到的最远是nums[0] + 0 = 3，也就是下标为3的元素
+
+我们遍历到第2个元素的时候，能走到的最远是nums[1] + 1 = 3，也就是下标为3的元素
+
+我们遍历到第3个元素的时候，能走到的最远是nums[2] + 2= 3，也就是下标为3的元素
+
+我们遍历到第4个元素的时候，能走到的最远是nums[3] + 3 = 3，也就是下标为3的元素
+
+事实上没有办法到达数组的末尾，所以返回false
+
+我们可以发现，最终能够返回true的形式是，至少存在一个`nums[i] + i > nums.size() - 1`
+
+```c++
+#include "vector"
+#include "iostream"
+
+class Solution 
+{
+public:
+    bool canJump(std::vector<int>& nums) 
+    {
+        if (nums.size() <= 1) return true;
+
+        int JumpLocation = 0;
+        for (int i = 0; i <= JumpLocation; i++)
+        {
+            // 动态更新能到达的最远的位置
+            if (JumpLocation >= nums.size() - 1) return true;
+            JumpLocation = std::max(JumpLocation, nums[i] + i);
+        }
+
+        return false;
+    }
+};
+```
+
 # 2025/3/4 [盛最多水的容器](https://leetcode.cn/problems/container-with-most-water/description/)
+
+题目要求我们计算一个由整数数组 `height` 表示的容器所能容纳的最大水量。数组中的每个元素代表容器在该位置的高度，容器的宽度由数组的索引差决定。我们需要找到两个高度，使得它们与它们之间的距离相乘得到的面积最大。
+$$
+Area = (j - i) * min(Height[j], Height[i]);
+$$
+所以我们的目标是保证`j - i `以及`min(Height[j], Height[i])`最大
+
+- 使用两个指针 `lower` 和 `upper`，分别指向数组的起始和末尾。
+- 计算当前指针所指的两个高度之间的面积，并更新最大面积。
+- 移动指针的策略是：移动高度较小的指针，因为移动高度较大的指针不会增加面积。
+
+- 如果 `height[lower] < height[upper]`，则移动 `lower` 指针向右。
+- 否则，移动 `upper` 指针向左。
+
+```c++
+#include "vector"
+#include "iostream"
+class Solution 
+{
+public:
+    int maxArea(std::vector<int>& height) 
+    {
+        int lower = 0;
+        int upper = height.size() - 1;
+        int maxArea = 0;
+        while (lower < upper)
+        {
+            maxArea = std::max((upper -lower) * std::min(height[lower], height[upper]), maxArea);
+            if (height[lower] > height[upper])
+            {
+                upper--;
+            }
+            else
+            {
+                lower++;
+            }
+        }
+        return maxArea;
+    }
+};
+```
+

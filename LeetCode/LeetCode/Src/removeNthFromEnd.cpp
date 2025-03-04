@@ -16,13 +16,13 @@ public:
     {
         if ((!head->next && n >= 1) || !head )
         {
+            // 如果只有一个节点, 或者根本没有节点
             head = nullptr;
             return head;    
         }
 
-        ListNode* NextN = head;
-        ListNode* Current = head;
-
+        ListNode* NextN = head; // 快指针
+        ListNode* Current = head; // 慢指针
         for (int i = 1; i <= n; i++)
             NextN = NextN->next;
 
@@ -37,16 +37,15 @@ public:
             return head;
         }
 
-        ListNode* Last = Current;
-        while (NextN)
+        while (NextN->next)
         {
             NextN = NextN->next;
-            Last = Current;
             Current = Current->next;
         }
 
-        Last->next = Current->next;
-        delete Current;
+        ListNode* ToDelete = Current->next;
+        Current->next = Current->next->next;
+        delete ToDelete;
 
         return head;
     }
