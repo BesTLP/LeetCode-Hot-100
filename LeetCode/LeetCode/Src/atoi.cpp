@@ -8,7 +8,7 @@ public:
     {
         int index = 0;
         // 空格全清
-        while (s[index] == " ") // 注意这里不能使用" "，而是应该使用' '
+        while (s[index] == ' ') // 注意这里不能使用" "，而是应该使用' '
             index++;
 
         int flag = 1;
@@ -48,8 +48,3 @@ public:
         return sum;
     }
 };
-int main()
-{
-    std::string s = "0-1";
-    std::cout << Solution::myAtoi(s) << std::endl;
-}

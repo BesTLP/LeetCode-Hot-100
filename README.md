@@ -561,7 +561,8 @@ public:
 };
 ```
 
+# 2025/3/4 [删除链表的倒数第 N 个结点](https://leetcode.cn/problems/remove-nth-node-from-end-of-list/description/)
 
+# 2025/3/4 [跳跃游戏](https://leetcode.cn/problems/jump-game/description/)
 
-
-
+# 2025/3/4 [盛最多水的容器](https://leetcode.cn/problems/container-with-most-water/description/)
