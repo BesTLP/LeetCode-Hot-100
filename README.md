@@ -756,3 +756,234 @@ public:
 };
 ```
 
+# 2025/3/4 [ Pow(x, n) ](https://leetcode.cn/problems/powx-n/submissions/605982513/)
+
+```c++
+执行时间:0ms
+```
+
+
+
+
+
+这道题目是经典的快速幂算法问题，要求实现一个函数 `myPow(double x, int n)`，计算 `x` 的 `n` 次方。
+
+特殊情况：
+
+- 如果 `x` 为 1，那么无论 `n` 是多少，结果都是 1。
+- 如果 `n` 为 0，那么任何数的 0 次方都是 1。
+- 如果 `n` 为 1，那么结果就是 `x` 本身。
+
+**负指数处理**：如果 `n` 是负数，我们可以将其转换为正数，然后计算 `x` 的 `-n` 次方，最后取倒数。
+
+我们通过通过递归将问题分解为更小的子问题，利用 `x^n = x^(n/2) * x^(n/2)` 的性质，减少计算次数。
+
+```c++
+if(n % 2 == 0) x^n = x^(n/2) * x^(n/2); // like: n = 4
+
+if(n % 2 != 0) x^n = x^(n/2) * x^(n/2) * x; // like: n = 5
+```
+
+但是测试用例里面涉及一个测试用例`(2， INT_MIN)`
+
+>要注意`INT`的范围实际上是[-2^31 -1 , 2^31]，所以INT_MIN直接取负数的话是会超出范围的
+>
+>而`-(INT_MIN + 1) = INT_MAX`所以我们可以用下面的方式来解决这个问题
+>
+>```c++
+>if(n == INT_MIN) return myPow(x, n + 1) / x;
+>```
+>
+>
+
+```c++
+#include "iostream"
+#include "vector"
+class Solution 
+{
+public:
+    double myPow(double x, int n) 
+    {
+        if (x == 1 || n == 0) return 1;
+
+        if (n == 1) return x;
+
+        if (n == INT_MIN) return myPow(x, n + 1) / x;
+        x = n < 0 ? 1 / x : x;
+        n = n < 0 ? -n : n;
+        
+        double temp = myPow(x, n / 2);
+        if (n % 2 == 0)
+        {
+            return temp * temp;
+        }
+        else
+        {
+            return temp * temp * x;
+        }
+    }
+};
+```
+
+
+
+# 2025/3/10 [电话号码的字母组合](https://leetcode.cn/problems/letter-combinations-of-a-phone-number/solutions/388738/dian-hua-hao-ma-de-zi-mu-zu-he-by-leetcode-solutio/)
+
+
+
+给定一个仅包含数字 `2-9` 的字符串，返回所有它能表示的字母组合。答案可以按 **任意顺序** 返回。
+
+给出数字到字母的映射如下（与电话按键相同）。注意 1 不对应任何字母。
+
+**示例 1：**
+
+```
+输入：digits = "23"
+输出：["ad","ae","af","bd","be","bf","cd","ce","cf"]
+```
+
+**示例 2：**
+
+```
+输入：digits = ""
+输出：[]
+```
+
+**示例 3：**
+
+```
+输入：digits = "2"
+输出：["a","b","c"]
+```
+
+
+
+用`DFS`即可完成，注意在这道题之中，我们使用DFS是可以重复的，例如下面的情况是可以允许的：
+
+```c++
+输入：digits = "22"
+输出：["aa","ab","ac",......]
+```
+
+所以我们的`DFS`代码就变成了
+
+```c++
+void DFS(std::vector<std::string>& result, std::string& TempResult, std::vector<int>& index, int cnt)
+{
+    if (cnt == index.size())
+    {
+        result.push_back(TempResult);
+        return;
+    }
+    int i = index[cnt];
+    for (int j = 0; j < NumberChar[i].size(); j++)
+    {
+        TempResult.push_back(NumberChar[i][j]);
+        DFS(result, TempResult, index, cnt + 1);
+        TempResult.pop_back();
+    }
+}
+```
+
+定义的二维动态数组如下，注意`0`和`1`并不代表任何字母
+
+```c++
+const std::vector<std::vector<char>> Solution::NumberChar =
+{
+    {},
+    {},
+    {'a','b','c'},
+    {'d','e','f'},
+    {'g','h','i'},
+    {'j','k','l'},
+    {'m','n','o'},
+    {'p','q','r','s'},
+    {'t','u', 'v'},
+    {'w','x','y','z'}
+};
+```
+
+
+
+```c++
+#include "iostream"
+#include "vector"
+#include "string"
+
+class Solution
+{
+public:
+    static const std::vector<std::vector<char>> NumberChar;
+    void DFS(std::vector<std::string>& result, std::string& TempResult, std::vector<int>& index, int cnt)
+    {
+        if (cnt == index.size())
+        {
+            result.push_back(TempResult);
+            return;
+        }
+        int i = index[cnt];
+        for (int j = 0; j < NumberChar[i].size(); j++)
+        {
+            TempResult.push_back(NumberChar[i][j]);
+            DFS(result, TempResult, index, cnt + 1);
+            TempResult.pop_back();
+        }
+    }
+    std::vector<std::string> letterCombinations(std::string digits)
+    {
+        if (digits.empty()) return std::vector<std::string>();
+
+        std::vector<int> index;
+        for (auto c : digits)
+        {
+            index.push_back(c - '0');
+        }
+        std::vector<std::string> result;
+        std::string TempResult;
+
+        DFS(result, TempResult, index, 0);
+        return result;
+    }
+};
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

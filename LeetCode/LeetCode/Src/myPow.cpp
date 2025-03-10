@@ -9,24 +9,18 @@ public:
 
         if (n == 1) return x;
 
-        long long int m = n;
+        if (n == INT_MIN) return myPow(x, n + 1) / x;
         x = n < 0 ? 1 / x : x;
-        m = m < 0 ? -m : m;
+        n = n < 0 ? -n : n;
         
-        double temp = myPow(x, m / 2);
-        if (m % 2 == 0)
+        double temp = myPow(x, n / 2);
+        if (n % 2 == 0)
         {
             return temp * temp;
         }
         else
         {
-            return temp * myPow(x, m / 2 + 1);
+            return temp * temp * x;
         }
     }
 };
-
-int main()
-{
-    Solution solution;
-    std::cout << solution.myPow(2.0, -2147483648);
-}
