@@ -947,11 +947,73 @@ public:
 };
 ```
 
+# 2025/3/10 [全排列](https://leetcode.cn/problems/permutations/submissions/)
 
+给定一个不含重复数字的数组 `nums` ，返回其 *所有可能的全排列* 。你可以 **按任意顺序** 返回答案。
 
+ **示例 1：**
 
+```
+输入：nums = [1,2,3]
+输出：[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]
+```
 
+**示例 2：**
 
+```
+输入：nums = [0,1]
+输出：[[0,1],[1,0]]
+```
+
+**示例 3：**
+
+```
+输入：nums = [1]
+输出：[[1]]
+```
+
+全排列的每一次`DFS`都需要从头开始查找当前没有被加入到`TempResult`的数字，递归的终止条件是当前已经把所有数字都添加到了`TempResult`中
+
+ ```c++
+ #include <vector>
+ 
+ class Solution 
+ {
+ private:
+     void DFS(std::vector<std::vector<int>>& Results, std::vector<int>& TempResult, std::vector<int>& nums, int cnt)
+     {
+         if (cnt == nums.size())
+         {
+             Results.push_back(TempResult);
+             return;
+         }
+ 
+         for (int i = 0; i < nums.size(); i++)
+         {
+             if (!flag[i])
+             {
+                 flag[i] = true;
+                 TempResult.push_back(nums[i]);
+                 DFS(Results, TempResult, nums, cnt + 1);
+                 TempResult.pop_back();
+                 flag[i] = false;
+             }
+         }
+     }
+     
+ public:
+     std::vector<std::vector<int>> permute(std::vector<int>& nums) 
+     {
+         std::vector<std::vector<int>> Results;
+         std::vector<int> TempResult;
+         DFS(Results, TempResult, nums, 0);
+ 
+         return Results;
+     }
+ 
+     bool flag[10] = { false };
+ };
+ ```
 
 
 
