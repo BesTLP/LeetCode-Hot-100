@@ -1015,6 +1015,431 @@ public:
  };
  ```
 
+# 2025/3/11 [最小路径和](https://leetcode.cn/problems/minimum-path-sum/description/)
+
+给定一个包含非负整数的 `m x n` 网格 `grid` ，请找出一条从左上角到右下角的路径，使得路径上的数字总和为最小。
+
+**说明：**<font color='FFD00'>**每次只能向下或者向右移动一步。**</font>
+
+---
+
+这道题的特点是每次<font color='87CEFA'>**只能向右或向下移动**</font>，因此不会出现回退的情况，也就不需要记录是否访问过当前网格。我们可以从多个角度来解决这个问题，包括 **DFS**、**BFS**、**动态规划（DP）** 和 **Dijkstra 算法**。
+
+### DFS 解法
+
+DFS（深度优先搜索）是一种递归的搜索方法，适用于路径搜索问题。我们需要明确以下几点：
+
+1. **搜索结束条件**：当当前位置到达右下角时，搜索结束，并更新最小路径和。
+
+2. **继续搜索条件**：由于只能向右或向下移动，且不需要回退，因此可以直接递归搜索下一个可能的网格。
+
+   >注意，一般情况下需要记录当前搜索的网格是否已经被访问，只是当前题较为特殊
+
+- 搜索结束，当目前已经到达右下角时搜索结束
+
+  ```c++
+  if (x == m - 1 && y == n - 1)
+  {
+      minSum = std::min(sum, minSum);
+      return;
+  }
+  ```
+
+- 继续搜索，由于本题并不涉及到回退的问题，因此可以直接继续搜索，直到搜索结束
+
+  ```c++
+  int moveX[2] = { 1,0 };
+  int moveY[2] = { 0,1 };
+  for (int i = 0; i < 2; i++)
+  {
+      // i = 0 →
+      // i = 1 ↓
+      int nextX = x + moveX[i];
+      int nextY = y + moveY[i];
+      if (nextX >= 0 && nextX < m &&
+          nextY >= 0 && nextY < n )
+      {
+          DFS(grid, nextX, nextY, sum + grid[nextX][nextY]);
+      }
+  }
+  ```
+
+```c++
+///********************************
+//*************  DFS  *************
+//*********************************/
+
+class Solution 
+{
+public:
+    int minPathSum(std::vector<std::vector<int>>& grid)
+    {
+        minSum = INT_MAX;
+        DFS(grid, 0, 0, grid[0][0]);
+        return minSum;
+    }
+private:
+    void DFS(std::vector<std::vector<int>>& grid, int x, int y, int sum)
+    {
+        int m = grid.size();
+        int n = grid[0].size();
+        if (x == m - 1 && y == n - 1)
+        {
+            minSum = std::min(sum, minSum);
+            return;
+        }
+        int moveX[2] = { 1,0 };
+        int moveY[2] = { 0,1 };
+        for (int i = 0; i < 2; i++)
+        {
+            int nextX = x + moveX[i];
+            int nextY = y + moveY[i];
+            if (nextX >= 0 && nextX < m &&
+                nextY >= 0 && nextY < n )
+            {
+                DFS(grid, nextX, nextY, sum + grid[nextX][nextY]);
+            }
+        }
+    }
+    int minSum;
+};
+```
+
+虽然 DFS 解法直观易懂，但在网格较大的情况下，时间复杂度会非常高，因为存在大量的重复计算，一般的算法题稍微添加一个时间限制就容易过不了。
+
+### BFS 解法
+
+BFS（广度优先搜索）是一种基于队列的搜索方法，适用于路径搜索问题。我们需要明确以下几点：
+
+1. **搜索结束条件**：当当前位置到达右下角时，搜索结束，并更新最小路径和。
+
+   ```c++
+   if (x == grid.size() - 1 && y == grid[0].size() - 1)
+   {
+       minSum = std::min(minSum, sum);
+   }
+   ```
+
+2. **继续搜索条件**：由于只能向右或向下移动，因此可以直接将下一个可能的网格加入队列。
+
+   ```c++
+   if (x + 1 < grid.size())
+   {
+       aQueue.emplace(Location(x + 1, y, sum + grid[x + 1][y]));
+   }
+   if (y + 1 < grid[0].size())
+   {
+       aQueue.emplace(Location(x, y + 1, sum + grid[x][y + 1]));
+   }
+   ```
+
+```c++
+///********************************
+//*************  BFS  *************
+//*********************************/
+class Solution
+{
+public:
+    struct Location
+    {
+        Location(int _x, int _y, int _sum)
+            : x(_x), y(_y), sum(_sum) {}
+
+        int x;
+        int y;
+        int sum;
+    };
+    int minPathSum(std::vector<std::vector<int>>& grid)
+    {
+        std::queue<Location> aQueue;
+        aQueue.emplace(Location(0, 0, grid[0][0]));
+        int minSum = INT_MAX;
+        while (!aQueue.empty())
+        {
+            Location front = aQueue.front();
+            int x = front.x;
+            int y = front.y;
+            int sum = front.sum;
+            aQueue.pop();
+            if (x == grid.size() - 1 && y == grid[0].size() - 1)
+            {
+                minSum = std::min(minSum, sum);
+            }
+            if (x + 1 < grid.size())
+            {
+                aQueue.emplace(Location(x + 1, y, sum + grid[x + 1][y]));
+            }
+            if (y + 1 < grid[0].size())
+            {
+                aQueue.emplace(Location(x, y + 1, sum + grid[x][y + 1]));
+            }
+        }
+        return minSum;
+    }
+};
+
+```
+
+BFS的解决办法和DFS一样，容易出现超出时间限制的情况。
+
+### 动态规划（DP）解法
+
+动态规划通过存储中间结果来避免重复计算，时间复杂度为 O(m * n)，适合大规模网格。
+
+因为这道题的特殊性，所以可以使用动态规划去做，但是如果上下左右都可以移动的话，则无法使用动态规划。
+
+1. **初始化**：
+
+   - `dp[0][0]` 初始化为 `grid[0][0]`，表示起点的路径和。
+
+   - 初始化第一列和第一行的路径和，第一列只能由上方网格移动而来，第一行也只能由左侧的网格移动而来
+
+     ```c++
+     dp[0][0] = grid[0][0];
+     for (int i = 1; i < m; i++)
+     {
+         dp[i][0] = dp[i - 1][0] + grid[i][0];
+     }
+     for (int i = 1; i < n; i++)
+     {
+         dp[0][i] = dp[0][i - 1] + grid[0][i];
+     }
+     ```
+
+2. **状态转移**：
+
+   - 对于每个网格 `(i, j)`，其最小路径和为上方和左方网格的最小值加上当前网格的值。
+
+     ```c++
+     for (int i = 1; i < m; i++)
+     {
+         for (int j = 1; j < n; j++)
+         {
+             dp[i][j] = std::min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
+         }
+     }
+     ```
+
+### Dijkstra 算法解法
+
+Dijkstra 算法是一种贪心算法，适用于带权图的最短路径问题。我们可以将网格看作图，每个网格的值作为边的权重。
+
+Dijkstra 算法是通过找当前最短路，以求实现全局最短的方法。
+
+找最短路的方法我们需要通过优先队列构建最小堆来实现。
+
+```c++
+struct Location
+{
+    Location(int _x, int _y, int _sum)
+        : x(_x), y(_y), sum(_sum) {}
+    int x, y, sum;
+};
+struct CompareLocation
+{
+    bool operator()(const Location& L1, const Location& L2)
+    {
+        return L1.sum > L2.sum; // 最小堆,注意是＞符号
+    }
+};
+std::priority_queue<Location, std::vector<Location>, CompareLocation> priQueue;
+```
+
+#### 代码解析
+
+1. **初始化**：
+
+   - 使用最小堆 `priQueue` 存储待搜索的位置，起点 `(0, 0, grid[0][0])` 入队。
+   - `dist` 表初始化为 `INT_MAX`，表示每个位置的最小路径和。
+
+2. **Dijkstra 过程**：
+
+   - 从堆中取出堆顶元素，检查是否到达右下角。如果到达，则返回当前路径和。
+
+   - 将当前节点的右节点和下节点加入堆（如果它们在网格范围内，并且新路径和更小）。
+
+     ```c++
+     for (int i = 0; i < 2; i++)
+     {
+         int nextX = top.x + moveX[i];
+         int nextY = top.y + moveY[i];
+         if (nextX >= 0 && nextX < m && nextY >= 0 && nextY < n)
+         {
+             int newSum = top.sum + grid[nextX][nextY];
+             if (newSum < dist[nextX][nextY])
+             {
+                 dist[nextX][nextY] = newSum;
+                 priQueue.push(Location(nextX, nextY, newSum));
+             }
+         }
+     }
+     ```
+
+# 2025/3/11 [岛屿数量](https://leetcode.cn/problems/number-of-islands/description/)
+
+给你一个由 `'1'`（陆地）和 `'0'`（水）组成的的二维网格，请你计算网格中岛屿的数量。
+
+岛屿总是被水包围，并且每座岛屿只能由水平方向和/或竖直方向上相邻的陆地连接形成。
+
+此外，你可以假设该网格的四条边均被水包围。
+
+---
+
+这道题其实很简单，就是查找有多少个连通图，我们对当前标记为1的网格进行DFS或者BFS搜索，就可以将其周围的所有标记为1的网格全部访问完。
+
+我们只需要记录下来我们一共执行了多少次访问即可。
+
+>注意，当我们进入DFS或者BFS函数的时候，与当前进入的网格1附近的所有元素为1的网格都会被赋值为0，整个过程动态变化，因此当前连通的岛屿只会被访问一次，并不会多次访问。
+
+```c++
+void BFS(int x, int y, std::vector<std::vector<char>>& grid)
+{
+    int m = grid.size();
+    int n = grid[0].size();
+    int mX[4] = { 1,-1,0,0 };
+    int mY[4] = { 0,0,1,-1 };
+
+    std::queue<std::pair<int, int>> q;
+    q.push(std::make_pair(x, y));
+    grid[x][y] = '0';
+    while (!q.empty())
+    {
+        auto front = q.front();
+        q.pop();
+        int x = front.first;
+        int y = front.second;
+        for (int i = 0; i < 4; i++)
+        {
+            int nx = x + mX[i];
+            int ny = y + mY[i];
+            if (nx >= 0 && nx < m &&
+                ny >= 0 && ny < n)
+            {
+                if (grid[nx][ny] - '0')
+                {
+                    grid[nx][ny] = '0';
+                    q.push(std::make_pair(nx, ny));
+                }
+            }
+        }
+    }
+}
+
+void DFS(int x, int y, std::vector<std::vector<char>>& grid)
+{
+    int m = grid.size();
+    int n = grid[0].size();
+    int mX[4] = { 1,-1,0,0 };
+    int mY[4] = { 0,0,1,-1 };
+    if (x >= 0 && x < m && y >= 0 && y < n)
+    {
+        if (grid[x][y] - '0')
+        {
+            grid[x][y] = '0';
+            for (int i = 0; i < 4; i++)
+            {
+                int nx = x + mX[i];
+                int ny = y + mY[i];
+                {
+                    DFS(nx, ny, grid);
+                }
+            }
+        }
+    }
+}
+int numIslands(std::vector<std::vector<char>>& grid)
+{
+    int m = grid.size();
+    int n = grid[0].size();
+    int cnt = 0;
+    std::vector<std::vector<bool>> visited(m, std::vector<bool>(n, false));
+    for (int i = 0; i < m; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            if (grid[i][j] - '0')
+            {
+                //BFS(i, j, grid);
+                DFS(i, j, grid);
+                cnt++;
+            }
+
+        }
+    }
+    return cnt;
+}
+};
+```
+
+# 2025/3/11 [不同路径](https://leetcode.cn/problems/unique-paths/description/)
+
+一个机器人位于一个 `m x n` 网格的左上角 （起始点在下图中标记为 “Start” ）。
+
+机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为 “Finish” ）。
+
+问总共有多少条不同的路径？
+
+---
+
+关键点也是，可以向下或者向右移动，因此我们可以通过动态规划来实现，和最小路径和的思路都是一样的，可以使用DFS或者BFS，但是大概率依然会超时。
+
+```c++
+class Solution
+{
+public:
+	int uniquePaths(int m, int n)
+	{
+		std::vector<std::vector<int>> dp(m, std::vector<int>(n, 0));
+		dp[0][0] = 1;
+		for (int i = 1; i < m; i++)
+		{
+			dp[i][0] = dp[i - 1][0];
+		}
+		for (int i = 1; i < n; i++)
+		{
+			dp[0][i] = dp[0][i - 1];
+		}
+
+		for (int i = 1; i < m; i++)
+		{
+			for (int j = 1; j < n; j++)
+			{
+				dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+			}
+		}
+		return dp[m - 1][n - 1];
+	}
+};
+
+//class Solution
+//{
+//public:
+//    void DFS(int m, int n, int x, int y)
+//    {
+//        if (x == m - 1 && y == n - 1)
+//        {
+//            cnt++;
+//        }
+//        for (int i = 0; i < 2; i++)
+//        {
+//            int nx = x + moveX[i];
+//            int ny = y + moveY[i];
+//            if (nx < m && ny < n)
+//                DFS(m, n, nx, ny);
+//        }
+//
+//    }
+//    int uniquePaths(int m, int n)
+//    {
+//        DFS(m, n, 0, 0);
+//        return cnt;
+//    }
+//    int cnt = 0;
+//    int moveX[2] = { 1, 0 };
+//    int moveY[2] = { 0, 1 };
+//};
+```
+
 
 
 
