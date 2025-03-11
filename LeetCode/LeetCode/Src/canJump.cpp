@@ -18,11 +18,3 @@ public:
         return false;
     }
 };
-//
-//int main()
-//{
-//    std::vector<int> nums;
-//    nums = {0, 2, 3};
-//    std::cout << Solution::canJump(nums); // static
-//
-//}
