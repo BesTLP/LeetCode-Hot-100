@@ -1440,6 +1440,984 @@ public:
 //};
 ```
 
+# 2025/3/15 [括号生成](https://leetcode.cn/problems/generate-parentheses/)
+
+
+
+数字 `n` 代表生成括号的对数，请你设计一个函数，用于能够生成所有可能的并且 **有效的** 括号组合。
+
+核心：
+
+1. 左括号出现的次数不可以多余`n`
+
+2. 右括号出现的次数不可以多余左括号
+3. 只要满足以上两点就可以一直递归
+
+```c++
+if(left < n)
+{
+    DFS(s + "(", left + 1, right, n);
+}
+if(right < left)
+{
+    DFS(s + "(", left + 1, right, n);
+}
+```
+
+
+
+递归结束条件，当左括号和右括号都达到`n`值，代表递归结束，为一次结果存储。
+
+```c++
+if(left == n && right == n)
+{
+    // 当前为一次结果
+}
+```
+
+
+
+```c++
+#include <vector>
+#include <string>
+#include <iostream>
+
+class Solution
+{
+public:
+    void DFS(std::string s, int left, int right, int n)
+    {
+        if (left ==  n && right == n)
+        {
+            result.push_back(s);
+            return;
+        }
+        if (left < n)
+        {
+            DFS(s + "(", left + 1, right, n);
+        }
+        if (right < left)
+        {
+            DFS(s + ")", left, right + 1, n);
+        }
+    }
+    std::vector<std::string> generateParenthesis(int n) 
+    {
+        std::string s;
+        DFS(s, 0, 0, n);
+        return result;
+    }
+public:
+    std::vector<std::string> result;
+};
+```
+
+# 2025/3/15 [三数之和](https://leetcode.cn/problems/3sum/)
+
+给你一个整数数组 `nums` ，判断是否存在三元组 `[nums[i], nums[j], nums[k]]` 满足 `i != j`、`i != k` 且 `j != k` ，同时还满足 `nums[i] + nums[j] + nums[k] == 0` 。请你返回所有和为 `0` 且不重复的三元组。
+
+**注意：**答案中不可以包含重复的三元组。
+
+防止三元组重复的方法：
+
+1. 先将整数数组按顺序排序
+
+2. 如果当前遍历的数字`nums[i] == nums[i - 1]`那么代表当前数字所涉及的情况已经被全部找到
+
+3. 对于`nums[j]`以及`nums[k]`同理
+
+   >`j`从 `i + 1`开始遍历，`k`从数组的末尾开始向前遍历，因此`j`需要判断与`j + 1`的值
+   >
+   >`k` 需要判断与`k - 1`的值
+
+如果是按照从小到大进行排序，如果当前`sum < 0`，应该移动左指针，反之移动右指针
+
+```c++
+else if (sum < 0)
+{
+    left++;
+}
+else
+{
+    right--;
+}
+```
+
+只有当前`sum = 0 `的时候，才需要同时移动指针，代表当前情况已经记录
+
+该题我们使用固定`i`，利用双指针的方式求解
+
+```c++
+#include "string"
+#include "vector"
+#include "iostream"
+#include <algorithm>
+class Solution
+{
+public:
+    std::vector<std::vector<int>> threeSum(std::vector<int>& nums)
+    {
+        std::sort(nums.begin(), nums.end());
+        std::vector<std::vector<int>> Result;
+        for (int i = 0; i < nums.size() - 1; i++)
+        {
+            if (i > 0 && nums[i] == nums[i - 1]) continue;
+            int left = i + 1;
+            int right = nums.size() - 1;
+            while (left < right)
+            {
+                int sum = nums[i] + nums[left] + nums[right];
+                if (sum == 0)
+                {
+                    Result.push_back({ nums[i], nums[left], nums[right] });
+                    while (left < right && nums[left] == nums[left + 1]) left++;
+                    while (left < right && nums[right] == nums[right - 1]) right--;
+                    left++;
+                    right--;
+                }
+                else if (sum < 0)
+                {
+                    left++;
+                }
+                else
+                {
+                    right--;
+                }
+            }
+        }
+        return Result;
+    }
+};
+```
+
+# 2025/3/15 [组合总和](https://leetcode.cn/problems/combination-sum/description/)
+
+给你一个 **无重复元素** 的整数数组 `candidates` 和一个目标整数 `target` ，找出 `candidates` 中可以使数字和为目标数 `target` 的 所有 **不同组合** ，并以列表形式返回。你可以按 **任意顺序** 返回这些组合。
+
+`candidates` 中的 **同一个** 数字可以 **无限制重复被选取** 。如果至少一个数字的被选数量不同，则两种组合是不同的。 
+
+对于给定的输入，保证和为 `target` 的不同组合数少于 `150` 个。
+
+
+
+这道题<font color='FFD00'>**并不是**</font>类似于背包算法，选择当前背包或者不选择当前背包，这道题中，每个数字的选择的机会都是等同的，所以我们需要去使用一个循环去遍历所有的数，选择是否加入当前结果中。
+
+```c++
+for(int i = 0; i < candidates.size(); i++)
+{
+    currentResult.push_back(candidates[i]);
+    DFS();
+    currentResult.pop_back();
+}
+```
+
+```c++
+#include <vector>
+#include <algorithm>
+#include <iostream>
+#include <string>
+class Solution
+{
+public:
+    void DFS(std::vector<int>& candidates, std::vector<int> currentResult, int sum, int index, int target)
+    {
+        if (sum == target)
+        {
+            Result.push_back(currentResult);
+            return;
+        }
+        else if (sum > target)
+        {
+            return;
+        }
+
+        for (int i = index; i < candidates.size(); i++)
+        {
+            currentResult.push_back(candidates[i]);
+            DFS(candidates, currentResult, sum + candidates[i], i, target);
+            currentResult.pop_back();
+        }
+    }
+    std::vector<std::vector<int>> combinationSum(std::vector<int>& candidates, int target)
+    {
+        std::vector<int> currentResult;
+        DFS(candidates, currentResult, 0, 0, target);
+        return Result;
+    }
+    std::vector<std::vector<int>> Result;
+
+};
+```
+
+# 2025/3/16 [最接近的三数之和 ](https://leetcode.cn/problems/3sum-closest/description/)
+
+
+
+这道题和三数之和的思路是相同的，也是采用三指针来解决。
+
+我们依然要采用先排序的方式来避免出现重复的情况。
+
+在三数之和中，如果`sum == target`，那么我们相当于找到了一组解。
+
+在本题中，可能并不存在`sum == target`的情况，因此我们需要记录当前`sum`与`target`的距离，并更新距离最小的值作为我们最后的结果
+
+```c++
+if (minus < minMinus)
+{
+    result = sum;
+    minMinus = minus;
+}
+```
+
+指针的移动，如果我们是从小到大排序的话，比较当前`sum`和`target`的值即可
+
+
+
+```c++
+if(sum < target)
+{
+    // 如果按照从小到大排序的话，应该移动左指针
+    left++
+}
+if(sum > target)
+{
+    right--;
+}
+```
+
+```c++
+#include <vector>
+#include <algorithm>
+#include <iostream>
+#include <string>
+class Solution 
+{
+public:
+    int threeSumClosest(std::vector<int>& nums, int target) 
+    {
+        std::sort(nums.begin(), nums.end());
+        int result = 0;
+        int minMinus = INT_MAX;
+        for (int i = 0; i < nums.size(); i++)
+        {
+            int left = i + 1;
+            int right = nums.size() - 1;
+            while (left < right)
+            {
+                int sum = nums[i] + nums[left] + nums[right];
+                int minus = std::abs(target - sum);
+                if (minus == 0) return sum;
+
+                if (minus < minMinus)
+                {
+                    result = sum;
+                    minMinus = minus;
+                }
+
+                if (sum > target)
+                {
+                    right--;
+                }
+                else
+                {
+                    left++;
+                }
+
+            }
+        }
+
+        return result;
+    }
+};
+```
+
+
+
+# 2025/3/16 [下一个排列](https://leetcode.cn/problems/next-permutation/)
+
+整数数组的一个 **排列** 就是将其所有成员以序列或线性顺序排列。
+
+- 例如，`arr = [1,2,3]` ，以下这些都可以视作 `arr` 的排列：`[1,2,3]`、`[1,3,2]`、`[3,1,2]`、`[2,3,1]` 。
+
+整数数组的 **下一个排列** 是指其整数的下一个字典序更大的排列。更正式地，如果数组的所有排列根据其字典顺序从小到大排列在一个容器中，那么数组的 **下一个排列** 就是在这个有序容器中排在它后面的那个排列。如果不存在下一个更大的排列，那么这个数组必须重排为字典序最小的排列（即，其元素按升序排列）。
+
+- 例如，`arr = [1,2,3]` 的下一个排列是 `[1,3,2]` 。
+- 类似地，`arr = [2,3,1]` 的下一个排列是 `[3,1,2]` 。
+- 而 `arr = [3,2,1]` 的下一个排列是 `[1,2,3]` ，因为 `[3,2,1]` 不存在一个字典序更大的排列。
+
+给你一个整数数组 `nums` ，找出 `nums` 的下一个排列。
+
+必须**[ 原地 ](https://baike.baidu.com/item/原地算法)**修改，只允许使用额外常数空间。
+
+---
+
+要找到当前排列的下一个排列，我们需要找到比当前排列大的最小排列。为了实现这一点，算法分为以下几个步骤：
+
+**从右向左找到第一个下降点**：
+
+- 从数组的末尾开始，找到第一个满足 `nums[i] < nums[i + 1]` 的位置 `i`。
+
+  ```c++
+  for (int i = nums.size() - 2; i >= 0; i--)
+  {
+      if (nums[i] < nums[i + 1])
+      {
+          minIndex = i;
+          break;
+      }
+  }
+  ```
+
+- 这个位置 `i` 是需要交换的位置，因为 `nums[i]` 是当前排列中最后一个可以增大的元素。
+
+- 如果找不到这样的 `i`，说明整个数组是降序排列的，直接将其反转成升序排列即可。
+
+**从右向左找到第一个大于 `nums[i]` 的元素**：
+
+- 在 `i` 的右侧，从右向左找到第一个大于 `nums[i]` 的元素 `nums[j]`。
+- 这个元素 `nums[j]` 是比 `nums[i]` 大的最小元素，交换它们可以使排列变大。
+
+**交换 `nums[i]` 和 `nums[j]`**：
+
+- 交换这两个元素，使得排列变大。
+
+**反转 `i` 右侧的部分**：
+
+- 将 `i` 右侧的部分反转，使其变为升序排列。
+
+- 这样可以保证得到的排列是最小的比当前排列大的排列。
+
+  ```c++
+  for (int j = nums.size() - 1; j > minIndex; j--)
+  {
+      if (nums[j] > nums[minIndex])
+      {
+          std::swap(nums[minIndex], nums[j]);
+          std::reverse(nums.begin() + minIndex + 1, nums.end());
+          break;
+      }
+  }
+  ```
+
+为什么这个算法有效？
+
+**找到下降点 `i`**：
+
+- 下降点 `i` 是当前排列中最后一个可以增大的位置。如果 `i` 不存在，说明当前排列已经是最大的排列。
+- 通过找到 `i`，我们确定了需要修改的部分。
+
+**找到 `nums[j]`**：
+
+- 在 `i` 的右侧，`nums[j]` 是比 `nums[i]` 大的最小元素。交换 `nums[i]` 和 `nums[j]` 后，排列会变大。
+
+**反转右侧部分**：
+
+- 交换后，`i` 右侧的部分<font color='87CEFA'>**仍然是降序排列**</font>的。通过<font color='87CEFA'>**反转，我们将其变为升序排列**</font>，从而得到最小的比当前排列大的排列。
+
+
+
+
+
+```c++
+#include <vector>
+#include <iostream>
+
+class Solution 
+{
+public:
+    void nextPermutation(std::vector<int>& nums) 
+    {
+        int minIndex = -1;
+        for (int i = nums.size() - 2; i >= 0; i--)
+        {
+            if (nums[i] < nums[i + 1])
+            {
+                minIndex = i;
+                break;
+            }
+        }
+        if (minIndex == -1)
+        {
+            std::reverse(nums.begin(), nums.end());
+            for (int k = 0; k < nums.size(); k++)
+            {
+                std::cout << nums[k];
+                if (k != nums.size() - 1) std::cout << ",";
+                else std::cout << std::endl;
+            }
+            return;
+        }
+
+        for (int j = nums.size() - 1; j > minIndex; j--)
+        {
+            if (nums[j] > nums[minIndex])
+            {
+                std::swap(nums[minIndex], nums[j]);
+                std::reverse(nums.begin() + minIndex + 1, nums.end());
+                break;
+            }
+        }
+        for (int k = 0; k < nums.size(); k++)
+        {
+            std::cout << nums[k];
+            if (k != nums.size() - 1) std::cout << " ";
+            else std::cout << std::endl;
+        }
+        return;
+    }
+};
+```
+
+
+
+# 2025/3/16 [最大子数组和](https://leetcode.cn/problems/maximum-subarray/)
+
+## **Kadane算法**
+
+Kadane算法用于在O(n)时间复杂度内求解最大子数组和。其核心思想是通过动态规划的思想，逐步计算以每个位置结尾的最大子数组和，并在这个过程中记录全局最大值。
+
+主要采用动态规划的思想，对于每一个元素，有两种方案。
+
+- 当前元素就是最大子数组，说明当前元素的值大于前面的子数组
+
+- 当前元素延续前面的子数组，成为更大的子数组，也就是当前元素的值小于当前元素的值加上前面子数组的和
+
+  ```c++
+  if(currentSum + nums[i] > nums[i]) currentSum += nums[i];
+  else 
+  {
+      currentSum = nums[i]; // 新的子数组开始的下标从 i 开始
+  }
+  ```
+
+- 我们每求出一个新的子数组的和，就需要更新最大子数组的和
+
+  ```c++
+  maxSum = std::max(maxSum, currentSum);
+  ```
+
+```c++
+#include <vector>
+class Solution
+{
+public:
+    int maxSubArray(std::vector<int>& nums)
+    {
+        int currentSum = nums[0];
+        int maxSum = currentSum;
+        for (int j = 1; j < nums.size(); j++)
+        {
+            if (currentSum + nums[j] > nums[j])
+            {
+                currentSum += nums[j];
+            }
+            else
+            {
+                currentSum = nums[j];
+            }
+            maxSum = std::max(maxSum, currentSum);
+        }
+        return maxSum;
+    }
+};
+```
+
+
+
+# 2025/3/17 [合并区间](https://leetcode.cn/problems/merge-intervals/description/)
+
+以数组 `intervals` 表示若干个区间的集合，其中单个区间为 `intervals[i] = [starti, endi]` 。请你合并所有重叠的区间，并返回 一个不重叠的区间数组，该数组需恰好覆盖输入中的所有区间。
+
+---
+
+首先需要保证我们的区间范围是从小到大的，左区间从小到大，左区间相同比较右侧区间，同样从小到大
+
+```c++
+std::sort(intervals.begin(), intervals.end(), [](const std::vector<int>& First, const std::vector<int>& Second)
+{
+        if (First[0] != Second[0])
+        {
+            return First[0] < Second[0];
+        }
+        else
+        {
+            return First[1] < Second[1];
+        }
+});
+```
+
+区间更新：
+
+- 左侧区间不用更新，因为我们就是按照从小到大来进行排列的
+
+- 右侧区间
+
+  - 如果当前右侧区间小于下一个区间的左侧区间，说明两个区间并没有交集，将当前区间的结果存储
+  - 如果当前右侧区间大于下一个区间的左侧区间，小于下一个区间的右侧区间，需要更新当前区间的右侧区间
+  - 如果当前右侧区间大于下一个区间的右侧区间，那么说明下一个区间为当前区间的子集，不用更新
+  - 最后一个区间无论是什么情况，我们都需要将其存储起来。
+
+  ```c++
+  std::vector<int> TempResult = intervals[0];
+  for (int i = 1; i < intervals.size(); i++)
+  {
+      std::vector<int> currentInterval = intervals[i];
+      int currentLeft = currentInterval[0];
+      int currentRight = currentInterval[1];
+      if (TempResult[1] < currentLeft)
+      {
+          mergeResult.push_back(TempResult);
+          TempResult = currentInterval;
+      }
+      else if (TempResult[1] >= currentLeft && TempResult[1] <= currentRight)
+      {
+          TempResult[1] = currentRight;
+      }
+  }
+  mergeResult.push_back(TempResult);
+  ```
+
+完整代码：
+
+```c++
+#include <vector>
+#include <algorithm>
+class Solution 
+{
+public:
+    std::vector<std::vector<int>> merge(std::vector<std::vector<int>>& intervals)
+    {
+        std::sort(intervals.begin(), intervals.end(), [](const std::vector<int>& First, const std::vector<int>& Second)
+        {
+                if (First[0] != Second[0])
+                {
+                    return First[0] < Second[0];
+                }
+                else
+                {
+                    return First[1] < Second[1];
+                }
+        });
+
+        std::vector<std::vector<int>> mergeResult;
+        std::vector<int> TempResult = intervals[0];
+        for (int i = 1; i < intervals.size(); i++)
+        {
+            std::vector<int> currentInterval = intervals[i];
+            int currentLeft = currentInterval[0];
+            int currentRight = currentInterval[1];
+            if (TempResult[1] < currentLeft)
+            {
+                mergeResult.push_back(TempResult);
+                TempResult = currentInterval;
+            }
+            else if (TempResult[1] >= currentLeft && TempResult[1] <= currentRight)
+            {
+                TempResult[1] = currentRight;
+            }
+        }
+        mergeResult.push_back(TempResult);
+
+        return mergeResult;
+    }
+};
+```
+
+
+
+# 2025/3/17 [无重复字符的最长子串](https://leetcode.cn/problems/longest-substring-without-repeating-characters/description/)
+
+给定一个字符串 `s` ，请你找出其中不含有重复字符的 **最长子串** 的长度。
+
+---
+
+可以使用滑动窗口（Sliding Window）算法。滑动窗口是一种在数组中寻找子数组或子串的常用技巧，特别适合处理涉及连续子串的问题。
+
+**初始化**：
+
+- 使用一个哈希集合（`HashSet`）来存储当前窗口中的字符。
+- 使用两个指针 `left` 和 `right` 来表示窗口的左右边界，初始时都指向字符串的开头。
+- 用一个变量 `max_length` 来记录最长子串的长度。
+
+**滑动窗口**：
+
+- 移动右指针 `right`，将字符逐个加入哈希集合。
+
+- 如果遇到重复字符（即字符已经在哈希集合中），则移动左指针 `left`，并从哈希集合中移除左指针指向的字符，直到重复字符被移除。
+
+- 在每次移动右指针后，更新 `max_length` 为当前窗口长度和 `max_length` 中的较大值。
+
+  ```c++
+  for (int right = 0; right < s.size(); right++)
+  {
+      while (charSet.find(s[right]) != charSet.end())
+      {
+          charSet.erase(s[left]);
+          left++;
+      }
+      charSet.insert(s[right]);
+      maxLength = std::max(maxLength, right - left + 1);
+  }
+  ```
+
+关于`Set`的使用
+
+- **`set`**：
+  - 元素是**有序的**，默认按升序排列。
+  - 支持按顺序遍历元素。
+- **`unordered_set`**：
+  - 元素是**无序的**，存储顺序不可预测。
+  - 遍历顺序与插入顺序无关。
+
+```c++
+#include <set>
+#include <string>
+#include <vector>
+#include <unordered_set>
+class Solution 
+{
+public:
+    int lengthOfLongestSubstring(std::string s) 
+    {
+        if (s.empty())
+        {
+            return 0;
+        }
+        std::unordered_set<char> charSet;
+        int left = 0;
+        int maxLength = INT_MIN;
+        for (int right = 0; right < s.size(); right++)
+        {
+            // 处理重复字母
+            while (charSet.find(s[right]) != charSet.end())
+            {
+                charSet.erase(s[left]);
+                left++;
+            }
+            // 加入当前字母
+            charSet.insert(s[right]);
+            
+            // 更新最大字串长度
+            maxLength = std::max(maxLength, right - left + 1);
+        }
+
+        return maxLength;
+    }
+};
+```
+
+
+
+# 2025/3/17 [ 最长回文子串](https://leetcode.cn/problems/longest-palindromic-substring/description/)
+
+给你一个字符串 `s`，找到 `s` 中最长的 回文 子串。
+
+---
+
+处理回文子串，我们需要使用中心扩展法，因为回文子串的长度可能是奇数也可能是偶数，因此，我们只需要遍历字符串中的每一个字符，让其向两边扩展即可找到以该字符为中心的最长回文子串。
+
+- 奇数长度：以某个字符为中心，向左右扩展。
+- 偶数长度：以两个字符为中心，向左右扩展。
+
+返回子串
+
+```c++
+s.substr(startLocation, length);
+```
+
+
+
+```c++
+int findPalindrome(const std::string& s, int left, int right)
+{
+    while (left >= 0 && right <= s.size() - 1 && s[left] == s[right])
+    {
+        left--;
+        right++;
+    }
+    return right - left - 1; // 注意这里是 -1，正常的长度为 right - left + 1，但是我们这里的结束条件是找到回文子串后还需要移动一次指针，也就是right - left + 1 - 2;
+}
+```
+
+完整代码：
+
+```c++
+#include <string>
+class Solution 
+{
+public:
+    std::string longestPalindrome(std::string s) 
+    {
+        if (s.empty()) return "";
+        int maxLength = INT_MIN;
+        int start = -1;
+        for (int i = 0; i < s.size(); i++)
+        {
+            int len1 = findPalindrome(s, i, i); // 奇数回文子串
+            int len2 = findPalindrome(s, i, i + 1); // 偶数回文子串
+
+            int len = std::max(len1, len2);
+            if (len > maxLength)
+            {
+                maxLength = len;
+                start = i - (len - 1) / 2;
+            }
+        }
+        return s.substr(start, maxLength);
+    }
+private:
+    int findPalindrome(const std::string& s, int left, int right)
+    {
+        while (left >= 0 && right <= s.size() - 1 && s[left] == s[right])
+        {
+            left--;
+            right++;
+        }
+        return right - left - 1;
+    }
+};
+```
+
+
+
+# 2025/3/17 [在排序数组中查找元素的第一个和最后一个位置](https://leetcode.cn/problems/find-first-and-last-position-of-element-in-sorted-array/description/)
+
+给你一个按照非递减顺序排列的整数数组 `nums`，和一个目标值 `target`。请你找出给定目标值在数组中的开始位置和结束位置。
+
+如果数组中不存在目标值 `target`，返回 `[-1, -1]`。
+
+你必须设计并实现时间复杂度为 `O(log n)` 的算法解决此问题。
+
+---
+
+只需要使用二分法找到`target`对应的值之后，向两边扩展即可，不过这种办法并不能完全实现`O(log n)`，比如全是`target`的情况
+
+```c++
+#include <vector>
+#include <iostream>
+
+class Solution 
+{
+public:
+    std::vector<int> searchRange(std::vector<int>& nums, int target) 
+    {
+        if (nums.size() == 0) return { -1, -1 };
+
+        int left = 0;
+        int right = nums.size() - 1;
+        int mid = left + (right - left) / 2;
+        while (left <= right && nums[mid] != target)
+        {
+            if (nums[mid] < target)
+            {
+                left = mid + 1;
+            }
+            else
+            {
+                right = mid - 1;
+            }
+            mid = left + (right - left) / 2;
+        }
+
+        if (right < left || nums[mid] != target)
+        {
+            return { -1, -1 };
+        }
+        
+        if (nums[mid] == target)
+        {
+            left = right = mid;
+            while (left - 1 >= 0 && nums[left - 1] == target) left--; // 这里需要先判断索引，再判断数组，不然就是overflow
+            while (right + 1 < nums.size() && nums[right + 1] == target) right++;
+        }
+
+        return { left, right };
+    }
+};
+```
+
+# 2025/3/17 [子集](https://leetcode.cn/problems/subsets/description/)
+
+给你一个整数数组 `nums` ，数组中的元素 **互不相同** 。返回该数组所有可能的子集（幂集）。
+
+解集 **不能** 包含重复的子集。你可以按 **任意顺序** 返回解集。
+
+---
+
+可以采用回溯法，遍历整个数组，每个数字都有选或者不选两种选择。
+
+
+
+```c++
+void backtrack(std::vector<int> nums, int start, std::vector<int> path, std::vector<std::vector<int>>& Result)
+{
+    Result.push_back(path); // 每一个路径都需要存储
+
+    for (int i = start; i < nums.size(); i++)
+    {
+        // 选择当前元素
+        path.push_back(nums[i]);
+        backtrack(nums, i + 1, path, Result);
+        
+        // 不选择当前元素
+        path.pop_back();
+    }
+}
+```
+
+完整代码：
+
+```c++
+#include <vector>
+
+class Solution 
+{
+public:
+    void backtrack(std::vector<int> nums, int start, std::vector<int> path, std::vector<std::vector<int>>& Result)
+    {
+        Result.push_back(path);
+
+        for (int i = start; i < nums.size(); i++)
+        {
+            path.push_back(nums[i]);
+            backtrack(nums, i + 1, path, Result);
+            path.pop_back();
+        }
+
+    }
+    std::vector<std::vector<int>> subsets(std::vector<int>& nums)
+    {
+        std::vector<std::vector<int>> Result;
+        backtrack(nums, 0, {}, Result);
+        return Result;
+    }
+};
+```
+
+# 2025/3/17 [颜色分类](https://leetcode.cn/problems/sort-colors/description/)
+
+给定一个包含红色、白色和蓝色、共 `n` 个元素的数组 `nums` ，**[原地](https://baike.baidu.com/item/原地算法)** 对它们进行排序，使得相同颜色的元素相邻，并按照红色、白色、蓝色顺序排列。
+
+我们使用整数 `0`、 `1` 和 `2` 分别表示红色、白色和蓝色。
+
+必须在不使用库内置的 sort 函数的情况下解决这个问题。
+
+---
+
+这个问题是经典的<font color='87CEFA'>**荷兰国旗问题（Dutch National Flag Problem）**</font>，我们可以使用三个指针来将数组分为三个部分：红色（0）、白色（1）和蓝色（2）。
+
+1. **指针定义**：
+   - `low` 指针指向红色区域的末尾，初始值为0。
+   - `right` 指针指向蓝色区域的开头，初始值为数组的最后一个元素。
+   - `mid` 指针用于遍历数组，初始值为0。
+2. **遍历过程**：
+   - 如果 `nums[mid] == 0`，表示当前元素是红色，将其与 `low` 指针指向的元素交换，并将 `low` 和 `mid` 指针都向右移动。
+   - 如果 `nums[mid] == 1`，表示当前元素是白色，直接跳过，`mid` 指针向右移动。
+   - 如果 `nums[mid] == 2`，表示当前元素是蓝色，将其与 `right` 指针指向的元素交换，并将 `right` 指针向左移动。
+3. **终止条件**：
+   - 当 `mid` 指针超过 `right` 指针时，遍历结束，数组已经按照红色、白色、蓝色的顺序排列。
+
+```c++
+#include <vector>
+class Solution 
+{
+public:
+    void sortColors(std::vector<int>& nums)
+    {
+        int left = 0;
+        int mid = 0;
+        int right = nums.size() - 1;
+        while (mid <= right)
+        {
+            if (nums[mid] == 1) mid++;
+            else if (nums[mid] == 0)
+            {
+                std::swap(nums[mid], nums[left]);
+                left++;
+                mid++;
+            }
+            else if (nums[mid] == 2)
+            {
+                std::swap(nums[mid], nums[right]);
+                right--;
+            }
+        }
+    }
+};
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

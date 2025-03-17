@@ -82,15 +82,15 @@ public:
     }
 };
 
-int main()
-{
-    Solution solution;
-    std::vector<std::vector<char>> grid =
-    {
-          {'1','1','0','0','0'},
-          {'1','1','0','0','0'},
-          {'0','0','1','0','0'},
-          {'0','0','0','1','1'}
-    };
-    std::cout << solution.numIslands(grid);
-}
+//int main()
+//{
+//    Solution solution;
+//    std::vector<std::vector<char>> grid =
+//    {
+//          {'1','1','0','0','0'},
+//          {'1','1','0','0','0'},
+//          {'0','0','1','0','0'},
+//          {'0','0','0','1','1'}
+//    };
+//    std::cout << solution.numIslands(grid);
+//}
