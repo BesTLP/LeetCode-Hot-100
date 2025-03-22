@@ -2346,95 +2346,1135 @@ public:
 };
 ```
 
+# 2025/3/19 [二叉树的层序遍历](https://leetcode.cn/problems/binary-tree-level-order-traversal/)
+
+
+
+给你二叉树的根节点 `root` ，返回其节点值的 **层序遍历** 。 （即逐层地，从左到右访问所有节点）。
+
+---
+
+层序遍历通常需要使用`quque`来实现，有两种实现的思路。
+
+- 第一种方法：将节点入队之后，将当前入队节点的左右节点也入队，从而可以保证当前层节点永远是在下一层节点之前被遍历，同时保证了左节点先于右节点遍历
+
+  ```c++
+  #include <vector>
+  #include <algorithm>
+  #include <queue>
+  
+  //Definition for a binary tree node.
+   struct TreeNode 
+   {
+       int val;
+       TreeNode *left;
+       TreeNode *right;
+       TreeNode() : val(0), left(nullptr), right(nullptr) {}
+       TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+       TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+   };
+  
+  class Solution
+  {
+  public:
+      std::vector<std::vector<int>> levelOrder(TreeNode* root)
+      {
+          if (root == nullptr)
+          {
+              return {};
+          }
+          std::queue<std::pair<TreeNode*, int>> queue;
+          std::vector<std::vector<int>> Result;
+          std::vector<int> currentResult;
+  
+          queue.push({ root, 0 });
+          int currentLevel = 0;
+          while (!queue.empty())
+          {
+              std::pair<TreeNode*, int> front = queue.front();
+              queue.pop();
+  
+              int val = front.first->val;
+              int level = front.second;
+              if (level != currentLevel)
+              {
+                  Result.push_back(currentResult);
+                  currentResult.clear();
+                  currentLevel = level;
+              }
+  
+              currentResult.push_back(val);
+  
+              TreeNode* left = front.first->left;
+              TreeNode* right = front.first->right;
+              if (left != nullptr)
+              {
+                  queue.push({ left, level + 1 });
+              }
+              if (right != nullptr)
+              {
+                  queue.push({ right, level + 1 });
+              }
+          }
+          Result.push_back(currentResult);
+          return Result;
+      }
+  };
+  ```
+
+- 第二种方法：检查当前队列大小，代表了当前层一共有多少个节点
+
+  - 比如第一层`layer`会将根节点入队，这时候`queue`大小为1，因此我们只会遍历前 1 个元素
+  - 将这一个元素的子节点都入队，也就是将`layer + 1`的子节点全部入队
+  - 如果队列不空，这时队列里面的元素个数就是`layer + 1`的节点个数
+
+  ```c++
+  class Solution
+  {
+  public:
+      std::vector<std::vector<int>> levelOrder(TreeNode* root)
+      {
+          if (root == nullptr)
+          {
+              return {};
+          }
+          std::queue<TreeNode*> queue;
+          std::vector<std::vector<int>> Result;
+  
+          queue.push(root);
+          int currentLevel = 0;
+          while (!queue.empty())
+          {
+              int size = queue.size(); // 获取当前层的节点数
+              std::vector<int> currentResult;
+              for (int i = 0; i < size; i++)
+              {
+                  TreeNode* front = queue.front();
+                  queue.pop();
+  
+                  int val = front->val;
+                  currentResult.push_back(val);
+                  TreeNode* left = front->left;
+                  TreeNode* right = front->right;
+                  if (left != nullptr)
+                  {
+                      queue.push(left);
+                  }
+                  if (right != nullptr)
+                  {
+                      queue.push(right);
+                  }
+              }
+              Result.push_back(std::move(currentResult));
+          }
+          return Result;
+      }
+  };
+  ```
+
+  
+
+```c++
+#include <vector>
+#include <algorithm>
+#include <queue>
+
+//Definition for a binary tree node.
+ struct TreeNode 
+ {
+     int val;
+     TreeNode *left;
+     TreeNode *right;
+     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ };
+
+class Solution
+{
+public:
+    std::vector<std::vector<int>> levelOrder(TreeNode* root)
+    {
+        if (root == nullptr)
+        {
+            return {};
+        }
+        std::queue<std::pair<TreeNode*, int>> queue;
+        std::vector<std::vector<int>> Result;
+        std::vector<int> currentResult;
+
+        queue.push({ root, 0 });
+        int currentLevel = 0;
+        while (!queue.empty())
+        {
+            std::pair<TreeNode*, int> front = queue.front();
+            queue.pop();
+
+            int val = front.first->val;
+            int level = front.second;
+            if (level != currentLevel)
+            {
+                Result.push_back(currentResult);
+                currentResult.clear();
+                currentLevel = level;
+            }
+
+            currentResult.push_back(val);
+
+            TreeNode* left = front.first->left;
+            TreeNode* right = front.first->right;
+            if (left != nullptr)
+            {
+                queue.push({ left, level + 1 });
+            }
+            if (right != nullptr)
+            {
+                queue.push({ right, level + 1 });
+            }
+        }
+        Result.push_back(currentResult);
+        return Result;
+    }
+};
+
+```
+
+
+
+# 2025/3/19 [数组中的第K个最大元素](https://leetcode.cn/problems/kth-largest-element-in-an-array/description/)
+
+给定整数数组 `nums` 和整数 `k`，请返回数组中第 `**k**` 个最大的元素。
+
+请注意，你需要找的是数组排序后的第 `k` 个最大的元素，而不是第 `k` 个不同的元素。
+
+你必须设计并实现时间复杂度为 `O(n)` 的算法解决此问题。
+
+---
+
+下面先讲解时间复杂度为`O(nlogk)`利用最小堆的算法。
+
+我们维护一个最小堆的优先队列
+
+```c++
+std::priority_queue<int, std::vector<int>, std::vector<greater<int>> pq;
+
+struct compare
+{
+    bool operator()(const int& a, const int& b)
+    {
+        return a > b;
+    }
+}
+std::priority_queue<int, std::vector<int>, compare> pq;
+```
+
+一直压入元素，直到元素数量大于`k`,那么我们可以检查当前元素是否比堆顶元素（最小的元素）大，这样的话，我们就删除堆顶元素，将当前更大的元素压入
+
+```c++
+#include <vector>
+#include <queue>
+
+class Solution 
+{
+public:
+    int findKthLargest(std::vector<int>& nums, int k)
+    {
+        std::priority_queue<int, std::vector<int>, std::greater<int>> pq;
+        for (int i = 0; i < nums.size(); i++)
+        {
+            if (pq.size() < k)
+            {
+                pq.push(nums[i]);
+            }
+            else if(nums[i] > pq.top())
+            {
+                pq.pop();
+                pq.push(nums[i]);
+            }
+        }
+        return pq.top();
+    }
+};
+```
+
+---
+
+时间复杂度为`O(n)`的算法，快速选择算法。
+
+准确地说就是每次选择一个基准元素，然后将整个数组(n)划分为两个部分，左侧为小于基准元素的部分(a)，右边为大于基准元素的部分(n - a - 1)
+
+我们检查当前需要找第`k`大的元素
+
+- 如果`n - pivotIndex > k`，就说明我们需要找的元素在右侧部分
+- 如果`n - pivotIndex == k`，说明就是我们选择的基准元素
+- 剩余的情况，说明我们需要找的元素在左侧部分
+
+# 2025/3/19 [最长连续序列](https://leetcode.cn/problems/longest-consecutive-sequence/description/)
+
+
+
+给定一个未排序的整数数组 `nums` ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。
+
+请你设计并实现时间复杂度为 `O(n)` 的算法解决此问题。
+
+**示例 1：**
+
+```
+输入：nums = [100,4,200,1,3,2]
+输出：4
+解释：最长数字连续序列是 [1, 2, 3, 4]。它的长度为 4。
+```
+
+**示例 2：**
+
+```
+输入：nums = [0,3,7,2,5,8,4,6,0,1]
+输出：9
+```
+
+**示例 3：**
+
+```
+输入：nums = [1,0,1,2]
+输出：3
+```
+
+---
+
+我们可以通过一个`map`来记录当前数字出现的次数
+
+然后遍历`map`，对于每个数
+
+- 如果当前数 - 1在map中不存在，说明当前数是起点，一直对当前数++看是否在map中，然后记录长度
+- 如果当前数 - 1在map中存在，说明当前数不是起点，`continue`
+
+```c++
+#include <vector>
+#include <set>
+#include <unordered_set>
+class Solution
+{
+public:
+    int longestConsecutive(std::vector<int>& nums)
+    {
+        if (nums.size() == 0) return 0;
+        std::unordered_set<int> numSet(nums.begin(), nums.end());
+
+        int maxLength = INT_MIN;
+        for (int num : numSet)
+        {
+            int currentNum = num;
+            if (numSet.find(currentNum - 1) == numSet.end())
+            {
+                int Length = 1;
+                // 说明当前是起点数
+                while (numSet.find(currentNum + 1) != numSet.end())
+                {
+                    currentNum++;
+                    Length++;
+                }
+                maxLength = std::max(Length, maxLength);
+            }
+        }
+        return maxLength;
+
+    }
+};
+```
+
+
+
+# 2025/3/19 [最长递增子序列](https://leetcode.cn/problems/longest-increasing-subsequence/description/)
+
+给你一个整数数组 `nums` ，找到其中最长严格递增子序列的长度。
+
+**子序列** 是由数组派生而来的序列，删除（或不删除）数组中的元素而不改变其余元素的顺序。例如，`[3,6,2,7]` 是数组 `[0,3,1,6,2,2,7]` 的子序列。
+
+
+
+**示例 1：**
+
+```
+输入：nums = [10,9,2,5,3,7,101,18]
+输出：4
+解释：最长递增子序列是 [2,3,7,101]，因此长度为 4 。
+```
+
+**示例 2：**
+
+```
+输入：nums = [0,1,0,3,2,3]
+输出：4
+```
+
+**示例 3：**
+
+```
+输入：nums = [7,7,7,7,7,7,7]
+输出：1
+```
+
+---
+
+这道题要使用<font color='87CEFA'>**动态规划**</font>来做，假设`dp[i]`代表了以当前元素`nums[i]`为结尾的最长严格递增子序列。
+
+那么我们的状态转移方程就很容易定义了。
+
+对于`dp[i]`，遍历所有的`0 - (i - 1)`找到满足元素小于`nums[i]`并且最长的严格递增子序列即可
+
+```c++
+#include <vector>
+class Solution
+{
+public:
+    int lengthOfLIS(std::vector<int>& nums)
+    {
+        if (nums.empty()) return 0;
+        std::vector<int> dp(nums.size(), 1);
+        for (int i = 1; i < nums.size(); i++)
+        {
+            for (int j = 0; j < i; j++)
+            {
+                if (nums[i] > nums[j])
+                {
+                    dp[i] = std::max(dp[i], dp[j] + 1);
+                }
+            }
+        }
+        return *std::max_element(dp.begin(), dp.end());
+    }
+};
+```
+
+
+
+# 2025/3/20 [寻找重复数](https://leetcode.cn/problems/find-the-duplicate-number/description/)
+
+给定一个包含 `n + 1` 个整数的数组 `nums` ，其数字都在 `[1, n]` 范围内（包括 `1` 和 `n`），可知至少存在一个重复的整数。
+
+假设 `nums` 只有 **一个重复的整数** ，返回 **这个重复的数** 。
+
+你设计的解决方案必须 **不修改** 数组 `nums` 且只用常量级 `O(1)` 的额外空间。
+
+---
+
+
+
+解决思路：<font color='A2CD5A'>**快慢指针**</font>
+
+假设我们将数组重新构建为链表，也就是当前`nums[i]`的值就是其`next`的索引值，因此如果数组中存在重复的元素，就一定会出现环路。
+
+如果我们从`nums[0]`开始构建快慢指针
+
+- 慢指针每次走`nums[i]`步
+- 快指针每次走`nums[nums[i]]`步
+
+假设无环长度为L，环的长度为C，那么假设快慢指针在环内相遇时距离环的起点为m
+
+那么有下列等式成立
+$$
+2(L + m) = L + m + nC\\
+L + m = nC
+$$
+如果我们此时将快指针移动到原点的位置，然后将两者的速度同时设置为一步
+
+快指针走到环的入口需要走L步，而慢指针走到环的入口需要走`C - m + nC`步，我们需要证明
+$$
+L = C- m + nC\\
+L = nC - m
+$$
+而由上面的公式`L + m = nC`可以得到当快指针走到环的入口的时候，慢指针一定刚好走到环的入口
+
+还有一个问题是，为什么快指针一定会在环内的第一圈就遇上慢指针？
+
+假设慢指针进入环内的时刻快指针在环内的位置只比慢指针多了一步，相距起点位置为`m`
+
+那么快指针想要追上慢指针还需要走`(C - 1)`步，因为快指针总是比慢指针快一步，所以还需要走`(C - 1)`步，而这不足以让慢指针完成一圈
+
+
+
+```c++
+#include <vector>
+
+class Solution 
+{
+public:
+    int findDuplicate(std::vector<int>& nums)
+    {
+        int fast = nums[nums[0]];
+        int slow = nums[0];
+        while (fast != slow)
+        {
+            slow = nums[slow];
+            fast = nums[nums[fast]];
+        }
+        fast = 0;
+        while (fast != slow)
+        {
+            slow = nums[slow];
+            fast = nums[fast];
+        }
+        return fast;
+    }
+};
+
+```
+
 
 
+# 2025/3/20 [环形链表](https://leetcode.cn/problems/linked-list-cycle-ii/)
 
+给定一个链表的头节点  `head` ，返回链表开始入环的第一个节点。 *如果链表无环，则返回 `null`。*
 
+如果链表中有某个节点，可以通过连续跟踪 `next` 指针再次到达，则链表中存在环。 为了表示给定链表中的环，评测系统内部使用整数 `pos` 来表示链表尾连接到链表中的位置（**索引从 0 开始**）。如果 `pos` 是 `-1`，则在该链表中没有环。**注意：`pos` 不作为参数进行传递**，仅仅是为了标识链表的实际情况。
 
+**不允许修改** 链表。
 
+---
 
+上一题的链表版本
 
+```c++
+#include <iostream>
+ class Solution
+ {
+ public:
+     ListNode* detectCycle(ListNode* head)
+     {
+        if(head == nullptr) return nullptr;
+        if(head->next == nullptr) return nullptr;
 
+         ListNode* slow = head;
+         ListNode* fast = head;
+         while (slow && fast && fast->next)
+         {
+             slow = slow->next;
+             fast = fast->next->next;
+             if (slow == fast) break;
+         }
 
+         if (!slow || !fast)
+         {
+             return nullptr;
+         }
 
+         fast = head;
+         while (fast != slow)
+         {
+            if(fast) fast = fast->next;
+            if(slow) slow = slow->next;
+         }
+         return fast;
+     }
+ };
+```
 
 
 
+# 2025/3/20 [路径总和 III](https://leetcode.cn/problems/path-sum-iii/description/)
 
+给定一个二叉树的根节点 `root` ，和一个整数 `targetSum` ，求该二叉树里节点值之和等于 `targetSum` 的 **路径** 的数目。
 
+**路径** 不需要从根节点开始，也不需要在叶子节点结束，但是路径方向必须是向下的（只能从父节点到子节点）。
 
+---
 
+解决思路一：<font color='A2CD5A'>**深度优先搜索**</font>
 
+我们需要定义一个函数`Search(TreeNode* root, int sum)`：代表了以当前`root`为根节点，所有路径和为`sum`的树的总数
 
+```c++
+long long Search(TreeNode* root, int targetSum)
+{
+    if(root == nullptr) return 0;
+    
+    int result = 0;
+    if(root->val == targetSum) result++;
+	
+    result += Search(root->left, targetSum - root->val);
+    result += Search(root->right, targetSum - root->val);
+    
+    return result;
+}
+```
 
 
 
+紧接着我们只需要遍历所有的节点，看以当前节点为根节点满足路径总和为targetSum的值即可
 
+```c++
+long long pathSum(TreeNode* root, long long targetSum)
+{
+    if (!root) return 0;
 
+    long long result = Search(root, targetSum); // 当前
 
+    result += pathSum(root->left, targetSum);
+    result += pathSum(root->right, targetSum);
 
+    return result;
+}
+```
+
+---
+
+解决思路：<font color='A2CD5A'>**前缀和**</font>
+
+还没想好QAQ
+
+# 2025/3/20 [零钱兑换](https://leetcode.cn/problems/coin-change/description/)
+
+给你一个整数数组 `coins` ，表示不同面额的硬币；以及一个整数 `amount` ，表示总金额。
+
+计算并返回可以凑成总金额所需的 **最少的硬币个数** 。如果没有任何一种硬币组合能组成总金额，返回 `-1` 。
+
+你可以认为每种硬币的数量是无限的。
+
+---
+
+解决思路：<font color='A2CD5A'>**完全背包问题**</font>
+
+对于[1, 2, 5]，我们需要凑齐`amount == 11`
+
+我们本次可以选择1，2，5这三个硬币，因此实际上相当于我们去比较`dp[11 - 5],dp[11 - 2],dp[11 -1]`其中哪一个最小
+
+将最小的数加上当前这一个硬币`std::min(dp[11 - 5],dp[11 - 2],dp[11 -1])`，就可以得到我们凑齐`11`需要的最小的硬币数了
+
+```c++
+#include <vector>
+#include <algorithm>
+class Solution
+{
+public:
+    int coinChange(std::vector<int>& coins, int amount)
+    {
+        std::vector<int> dp(amount + 1, INT_MAX);
+        dp[0] = 0;
+        for (int i = 1; i <= amount; i++)
+        {
+            for(int coin : coins)
+            {
+                if(coin <= i && dp[i - coin] != INT_MAX)
+                {
+                    dp[i] = std::min(dp[i], dp[i - coin] + 1);
+                }
+            }
+        }
+        return dp[amount] == INT_MAX? -1 : dp[amount];
+    }
+};
+```
+
+# 2025/3/20 [除自身以外数组的乘积](https://leetcode.cn/problems/product-of-array-except-self/description/)
+
+给你一个整数数组 `nums`，返回 数组 `answer` ，其中 `answer[i]` 等于 `nums` 中除 `nums[i]` 之外其余各元素的乘积 。
+
+题目数据 **保证** 数组 `nums`之中任意元素的全部前缀元素和后缀的乘积都在 **32 位** 整数范围内。
+
+请 **不要使用除法，**且在 `O(n)` 时间复杂度内完成此题。
+
+---
+
+解决思路：<font color='A2CD5A'>**前缀和**</font>
+
+对于下标`i`对应的数，除了自身以外数组的乘积实际上是将左边`0 - (i - 1)`的数全部乘起来以及右边`(i + 1) - (n - 1)`的数全部乘起来。
+
+也就是
+
+```c++
+answer[i] = left[i - 1] * right[i + 1];
+```
+
+因此我们只需要记录两个数组`left`和`right`，分别代表了当前`i`结束左边所有的数的乘积以及右边所有数的乘积
+
+>但实际上也可以定义是作为当前下标`i`，左侧`i - 1`个数的乘积，也就是不包含当前元素，这样就可以不用考虑边界的情况
+
+```c++
+#include <vector>
+
+class Solution
+{
+public:
+    std::vector<int> productExceptSelf(std::vector<int>& nums) 
+    {
+        std::vector<int> left(nums.size(), 1);
+        std::vector<int> right(nums.size(), 1);
+        std::vector<int> result(nums.size());
+        left[0] = nums[0];
+        for (int i = 1; i < nums.size(); i++)
+        {
+            left[i] = left[i - 1] * nums[i];
+        }
+        right[nums.size() - 1] = nums[nums.size() - 1];
+        for (int i = nums.size() - 2; i >= 0; i--)
+        {
+            right[i] = nums[i] * right[i + 1];
+        }
+        
+        for (int i = 0; i < nums.size(); i++)
+        {
+            if (i - 1 >= 0 && i + 1 < nums.size())
+            {
+                result[i] = left[i - 1] * right[i + 1];
+            }
+            else if (i - 1 >= 0) // 说明是最右边的数
+            {
+                result[i] = left[i - 1];
+            }
+            else // 说明是最左边的数
+            {
+                result[i] = right[i + 1];
+            }
+        }
 
+        return result;
+    }
+};
+```
 
+# 2025/3/22 [乘积最大子数组](https://leetcode.cn/problems/maximum-product-subarray/description/)
 
+给你一个整数数组 `nums` ，请你找出数组中乘积最大的非空连续子数组（该子数组中至少包含一个数字），并返回该子数组所对应的乘积。
 
+测试用例的答案是一个 **32-位** 整数。
 
+---
+
+解决思路：<font color='A2CD5A'>**前缀和**</font>
+
+这道题并不和最大子数组和完全相似，因为加减并不会出现数值突变的情况，也就是前面子数组的和如果是负数，那么如果当前的数也是负数，那么更新子数组的乘积就会变为正数，因此不能简单地判断前面子数组的乘积乘以当前数如果小于当前数就舍弃的情况。
+
+而是应该将以当前下标`i`为结尾的子数组的最大乘积以及最小乘积都记录下来。
+
+比较下列三者谁更大。
+
+```c++
+std::max(nums[i], nums[i] * minValue[i - 1], nums[i] * maxValue[i]);
+```
+
+```c++
+#include <vector>
+
+class Solution
+{
+public:
+    int maxProduct(std::vector<int>& nums)
+    {
+        std::vector<int> dpMax(nums.size(), 1);
+        std::vector<int> dpMin(nums.size(), 1);
+        dpMax[0] = nums[0];
+        dpMin[0] = nums[0];
+        int maxValue = nums[0];
+        for (int i = 1; i < nums.size(); i++)
+        {
+            // 其实可以额外编写一个比较三数最大的函数，因为 stl 的 std::max(min)不支持三数比较
+            maxValue = std::max(maxValue, nums[i]);
+            maxValue = std::max(maxValue, nums[i] * dpMax[i - 1]);
+            maxValue = std::max(maxValue, nums[i] * dpMin[i - 1]);
+            
+            dpMax[i] = nums[i];
+            dpMax[i] = std::max(dpMax[i - 1] * nums[i], dpMax[i]);
+            dpMax[i] = std::max(dpMin[i - 1] * nums[i], dpMax[i]);
+
+            dpMin[i] = nums[i];
+            dpMin[i] = std::min(dpMin[i - 1] * nums[i], dpMin[i]);
+            dpMin[i] = std::min(dpMax[i - 1] * nums[i], dpMin[i]);
+
+
+        }
+        return maxValue;
+    }
+};
+```
+
+# 2025/3/20 [不同的二叉搜索树](https://leetcode.cn/problems/unique-binary-search-trees/description/)
+
+给你一个整数 `n` ，求恰由 `n` 个节点组成且节点值从 `1` 到 `n` 互不相同的 **二叉搜索树** 有多少种？返回满足题意的二叉搜索树的种数。
+
+---
+
 
 
+解决思路：<font color='A2CD5A'>**动态规划**</font>
 
+二叉搜索树的重要性质:
 
+- 当前节点值＞左子树的所有值
+- 当前节点值＜右子树的所有值
 
+因此对于数字`j`其左子树有`j - 1`个节点，右子树有`n - j`个节点
 
+因此我们可以设定数组`dp[n]`
 
+`dp[i]`代表了当前节点数为 `i` 的情况下的二叉搜索树的个数，而`1 - i`的每一个节点都可以作为根节点
 
+状态转移方程为
 
+```c++
+dp[0] = 1; // 空节点也是一种情况
+dp[1] = 1; // 一个节点只有一种情况
+for(int i = 2; i <= n; i++)
+{
+    for(int j = 1; j <= i; j++)
+    {
+        // j 表示当前节点作为根节点
+        dp[i] += dp[j - 1] * dp[i - j];
+    }
+}
+```
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```c++
+#include <vector>
+class Solution 
+{
+public:
+    int numTrees(int n)
+    {
+        // dp[i]代表了当前节点数为i的情况下的二叉搜索树的个数
+        std::vector<int> dp(n + 1);
+        dp[0] = 1;
+        dp[1] = 1;
+        for (int i = 2; i <= n; i++)
+        {
+            // [1, i]都可以作为根节点
+            // 当前选择 j 作为根节点
+            // 因此左子树的数量为 j - 1
+            // 右子树的节点数量为 i - j
+            for (int j = 1; j <= i; j++)
+            {
+                dp[i] += dp[j - 1] * dp[i - j];
+            }
+        }
+        return dp[n];
+    }
+};
+```
+
+# 2025/3/20[最小栈](https://leetcode.cn/problems/min-stack/description/)
+
+设计一个支持 `push` ，`pop` ，`top` 操作，并能在常数时间内检索到最小元素的栈。
+
+实现 `MinStack` 类:
+
+- `MinStack()` 初始化堆栈对象。
+- `void push(int val)` 将元素val推入堆栈。
+- `void pop()` 删除堆栈顶部的元素。
+- `int top()` 获取堆栈顶部的元素。
+- `int getMin()` 获取堆栈中的最小元素。
+
+**示例 1:**
+
+```
+输入：
+["MinStack","push","push","push","getMin","pop","top","getMin"]
+[[],[-2],[0],[-3],[],[],[],[]]
+
+输出：
+[null,null,null,null,-3,null,0,-2]
+
+解释：
+MinStack minStack = new MinStack();
+minStack.push(-2);
+minStack.push(0);
+minStack.push(-3);
+minStack.getMin();   --> 返回 -3.
+minStack.pop();
+minStack.top();      --> 返回 0.
+minStack.getMin();   --> 返回 -2.
+```
+
+
+
+---
+
+解决思路：<font color='A2CD5A'>**双栈（主栈 + 最小栈）**</font>
+
+栈的实现可以利用`vector`数组，对于每一个元素我们都将其`push_back`到数组的末尾，弹出直接使用`pop_back`即可
+
+关键点在于我们需要在常数级的时间复杂度下返回当前栈中的最小值，我们通过最小栈的形式来实现。
+
+通过检测当前元素和最小栈中的最后一个元素（最小值）
+
+- 如果当前元素更小，则压入最小栈中，则最小栈中的最后一个元素依然是最小值
+- 如果当前元素更大，那么不压入最小栈中，并且保证了最小栈中的最后一个元素依然是最小值，由于当前元素压入的顺序在最小值之后，所以总是能够先行弹出。
+
+看一个例子：
+
+```c++
+1 2 4 5 5 // 当前栈内只有最小值为 1，因此最小栈中只有元素1
+4 2 1 5 5 // 当前栈内元素排列为4 2 1，5不压入栈中
+4 2 1 1 5 // 当前栈内元素排列4 2 1 1
+```
+
+检测主栈出栈的元素，如果元素是在最小栈中，那么记得删除最小栈中的元素
+
+```c++
+// #include <vector>
+
+// class MinStack
+// {
+// public:
+//    MinStack()
+//    {
+//        it = stack.begin();
+//    }
+
+//    void push(int val)
+//    {
+//        it = stack.emplace(it, val);
+//        if (minStack.empty() || val <= minStack.back())
+//        {
+//            minStack.push_back(val);
+//        }
+//    }
+
+//    void pop()
+//    {
+//        if (*it == minStack.back()) minStack.pop_back();
+//        it = stack.erase(it);
+//    }
+
+//    int top()
+//    {
+//        return *it;
+//    }
+
+//    int getMin()
+//    {
+//        return minStack.back();
+//    }
+// private:
+//    std::vector<int> stack;
+//    std::vector<int> minStack;
+//    std::vector<int>::iterator it;
+// };
+
+#include <vector>
+
+class MinStack
+{
+public:
+    MinStack()
+    {
+    }
+
+    void push(int val)
+    {
+        stack.push_back(val);
+        if (minStack.empty() || val <= minStack.back())
+        {
+            minStack.push_back(val);
+        }
+    }
+
+    void pop()
+    {
+        if (stack.back() == minStack.back()) minStack.pop_back();
+        stack.pop_back();
+    }
+
+    int top()
+    {
+        return stack.back();
+    }
+
+    int getMin()
+    {
+        return minStack.back();
+    }
+private:
+    std::vector<int> stack;
+    std::vector<int> minStack;
+};
+```
+
+# 2025/3/20 [课程表](https://leetcode.cn/problems/course-schedule/description/)
+
+你这个学期必须选修 `numCourses` 门课程，记为 `0` 到 `numCourses - 1` 。
+
+在选修某些课程之前需要一些先修课程。 先修课程按数组 `prerequisites` 给出，其中 `prerequisites[i] = [ai, bi]` ，表示如果要学习课程 `ai` 则 **必须** 先学习课程 `bi` 。
+
+- 例如，先修课程对 `[0, 1]` 表示：想要学习课程 `0` ，你需要先完成课程 `1` 。
+
+请你判断是否可能完成所有课程的学习？如果可以，返回 `true` ；否则，返回 `false` 。
+
+ 
+
+**示例 1：**
+
+```
+输入：numCourses = 2, prerequisites = [[1,0]]
+输出：true
+解释：总共有 2 门课程。学习课程 1 之前，你需要完成课程 0 。这是可能的。
+```
+
+**示例 2：**
+
+```
+输入：numCourses = 2, prerequisites = [[1,0],[0,1]]
+输出：false
+解释：总共有 2 门课程。学习课程 1 之前，你需要先完成课程 0 ；并且学习课程 0 之前，你还应先完成课程 1 。这是不可能的。
+```
+
+解决思路：<font color='A2CD5A'>**有向图关键路径**</font>
+
+将输入的数据维护为一个邻接表，然后记录每一个节点的入度
+
+利用队列，将入度为零的元素入队，然后将其所有指向的元素的入度 - 1，如果当前元素的入度为0了，将当前元素继续入队，然后执行直到队列为空
+
+我们只需要判断我们处理的元素个数是否和总元素个数相等即可。
+
+```c++
+#include <vector>
+#include <queue>
+class Solution
+{
+public:
+    bool canFinish(int numCourses, std::vector<std::vector<int>>& prerequisites) 
+    {
+        std::vector<std::vector<int>> adj(numCourses);
+        std::vector<int> in(numCourses, 0);
+        
+        for (auto pre : prerequisites)
+        {
+            // 要想修习second必须先学first
+            adj[pre[1]].push_back(pre[0]);
+            in[pre[0]]++;
+        }
+        
+        std::queue<int> q;
+        for (int i = 0; i < numCourses; i++)
+        {
+            if (in[i] == 0)
+            {
+                q.push(i);
+            }
+        }
+
+        int visited = 0;
+        while (!q.empty())
+        {
+            int front = q.front();
+            q.pop();
+            visited++;
+            for (int i = 0; i < adj[front].size(); i++)
+            {
+                int node = adj[front][i];
+                in[node]--;
+                if (in[node] == 0)
+                {
+                    q.push(node);
+                }
+            }
+        }
+        return visited == numCourses;
+    }
+
+};
+```
+
+# 2025/3/20 [前 K 个高频元素](https://leetcode.cn/problems/top-k-frequent-elements/description/)
+
+给你一个整数数组 `nums` 和一个整数 `k` ，请你返回其中出现频率前 `k` 高的元素。你可以按 **任意顺序** 返回答案。
+
+ 
+
+**示例 1:**
+
+```
+输入: nums = [1,1,1,2,2,3], k = 2
+输出: [1,2]
+```
+
+**示例 2:**
+
+```
+输入: nums = [1], k = 1
+输出: [1]
+```
+
+**提示：**
+
+- `1 <= nums.length <= 105`
+- `k` 的取值范围是 `[1, 数组中不相同的元素的个数]`
+- 题目数据保证答案唯一，换句话说，数组中前 `k` 个高频元素的集合是唯一的
+
+ 
+
+**进阶：**你所设计算法的时间复杂度 **必须** 优于 ，其中 `n` 是数组大小。
+
+---
+
+解决思路：一看`O(n log n)` 你就懂了，要用<font color='A2CD5A'>**最小堆**</font>来做
+
+我们首先利用`map`记录元素和其出现的频率
+
+然后利用最小堆优先队列将`map`中的所有元素存入
+
+- 如果当前元素的频率＜堆顶元素，`continue`
+
+- 如果当前元素的频率＞堆顶元素，然后将堆顶元素弹出，将当前元素入队
+
+  ```c++
+  struct Compare
+  {
+      bool operator()(const std::pair<int, int> a, const std::pair<int, int >b)
+      {
+          return a.second > b.second; // 最小堆是 > 
+      }
+  }
+  ```
+
+```c++
+#include <vector>
+#include <unordered_map>
+#include <queue>
+class Solution 
+{
+    struct Compare
+    {
+        bool operator()(const std::pair<int, int> a, const std::pair<int, int > b)
+        {
+            return a.second > b.second;
+        }
+    };
+public:
+    std::vector<int> topKFrequent(std::vector<int>& nums, int k) 
+    {
+        std::unordered_map<int, int> map;
+        for (int i = 0; i < nums.size(); i++)
+        {
+            if (map.find(nums[i]) != map.end())
+            {
+                map[nums[i]]++;
+            }
+            else
+            {
+                map[nums[i]] = 1;
+            }
+        }
+        std::pair<int, int> KeyWithFrequence;
+        std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, Compare> pq;
+        for (auto entry : map)
+        {
+            pq.push(entry);
+            if (pq.size() > k)
+            {
+                pq.pop();
+            }
+        }
+        std::vector<int> ret;
+        while (!pq.empty())
+        {
+            ret.push_back(pq.top().first);
+            pq.pop();
+        }
+        return ret;
+    }
+};
+```
 
 
 

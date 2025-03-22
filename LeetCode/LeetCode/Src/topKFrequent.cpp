@@ -47,10 +47,10 @@ public:
 
     }
 };
-
-int main()
-{
-    std::vector<int> nums = { 1,1,1,2,2,3 };
-    Solution solution;
-    solution.topKFrequent(nums, 2);
-}
+//
+//int main()
+//{
+//    std::vector<int> nums = { 1,1,1,2,2,3 };
+//    Solution solution;
+//    solution.topKFrequent(nums, 2);
+//}
