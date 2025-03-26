@@ -3478,6 +3478,683 @@ public:
 
 
 
+# 2025/3/24 [搜索旋转排序数组](https://leetcode.cn/problems/search-in-rotated-sorted-array/description/)
+
+整数数组 `nums` 按升序排列，数组中的值 **互不相同** 。
+
+在传递给函数之前，`nums` 在预先未知的某个下标 `k`（`0 <= k < nums.length`）上进行了 **旋转**，使数组变为 `[nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]`（下标 **从 0 开始** 计数）。例如， `[0,1,2,4,5,6,7]` 在下标 `3` 处经旋转后可能变为 `[4,5,6,7,0,1,2]` 。
+
+给你 **旋转后** 的数组 `nums` 和一个整数 `target` ，如果 `nums` 中存在这个目标值 `target` ，则返回它的下标，否则返回 `-1` 。
+
+你必须设计一个时间复杂度为 `O(log n)` 的算法解决此问题。
+
+**示例 1：**
+
+```
+输入：nums = [4,5,6,7,0,1,2], target = 0
+输出：4
+```
+
+**示例 2：**
+
+```
+输入：nums = [4,5,6,7,0,1,2], target = 3
+输出：-1
+```
+
+**示例 3：**
+
+```
+输入：nums = [1], target = 0
+输出：-1
+```
+
+---
+
+解决思路：<font color='A2CD5A'>**二分查找**</font>
+
+旋转数组至少<font color='87CEFA'>**保证了局部子数组有序的原则**</font>，对于任何一个数字，都处于其中一个升序数组之中
+
+但是对于左右指针的更新存在不一样的情况。
+
+我们获取到一个数之后，判断是否是需要寻找的`target`
+
+- 如果是`target`直接返回
+- 如果不是`target`，那么这个数一定处于某个升序数组之中
+  - 比较`nums[left]`和`nums[mid]`的大小
+    - 如果`nums[left]`更小，说明处于左侧的升序数组
+      - 如果`target`的数在`[nums[left], nums[mid])`之间，更新`right = mid - 1`
+      - 否则`left = mid + 1`
+    - 处于右侧的升序数组之中
+      - 如果`target`的数在`(nums[mid], nums[right]]`之间，更新`left + mid + 1`
+      - 否则`right = mid - 1`
+
+```c++
+#include <vector>
+
+class Solution 
+{
+public:
+    int search(std::vector<int>& nums, int target) 
+    {
+        int left = 0;
+        int right = nums.size() - 1;
+        while (left <= right)
+        {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] == target)
+            {
+                return mid;
+            }
+
+            if (nums[left] <= nums[mid])
+            {
+                // 左侧部分有序
+                if (nums[left] <= target && target < nums[mid])
+                {
+                    right = mid - 1;
+                }
+                else
+                {
+                    left = mid + 1;
+                }
+            }
+            else
+            {
+                if (nums[right] >= target && target > nums[mid])
+                {
+                    left = mid + 1;
+                }
+                else
+                {
+                    right = mid - 1;
+                }
+            }
+
+        }
+        return -1;
+    }
+};
+```
+
+
+
+# 2025/3/24 [旋转图像](https://leetcode.cn/problems/rotate-image/description/)
+
+给定一个 *n* × *n* 的二维矩阵 `matrix` 表示一个图像。请你将图像顺时针旋转 90 度。
+
+你必须在**[ 原地](https://baike.baidu.com/item/原地算法)** 旋转图像，这意味着你需要直接修改输入的二维矩阵。**请不要** 使用另一个矩阵来旋转图像。
+
+ 
+
+**示例 1：**
+
+![img](https://assets.leetcode.com/uploads/2020/08/28/mat1.jpg)
+
+```
+输入：matrix = [[1,2,3],[4,5,6],[7,8,9]]
+输出：[[7,4,1],[8,5,2],[9,6,3]]
+```
+
+**示例 2：**
+
+![img](https://assets.leetcode.com/uploads/2020/08/28/mat2.jpg)
+
+```
+输入：matrix = [[5,1,9,11],[2,4,8,10],[13,3,6,7],[15,14,12,16]]
+输出：[[15,13,2,5],[14,3,4,1],[12,6,8,9],[16,7,10,11]]
+```
+
+---
+
+解决思路：<font color='A2CD5A'>**转置矩阵并逆序每行元素**</font>
+
+```c++
+#include <vector>
+#include <algorithm>
+class Solution 
+{
+public:
+    void rotate(std::vector<std::vector<int>>& matrix)
+    {
+        for (int i = 0; i < matrix.size(); i++)
+        {
+            for (int j = i + 1; j < matrix.size(); j++)
+            {
+                std::swap(matrix[i][j], matrix[j][i]);
+            }
+            std::reverse(matrix[i].begin(), matrix[i].end());
+        }
+    }
+};
+```
+
+# 2025/3/24 [单词拆分](https://leetcode.cn/problems/word-break/description/)
+
+给你一个字符串 `s` 和一个字符串列表 `wordDict` 作为字典。如果可以利用字典中出现的一个或多个单词拼接出 `s` 则返回 `true`。
+
+**注意：**不要求字典中出现的单词全部都使用，并且字典中的单词可以重复使用。 
+
+**示例 1：**
+
+```
+输入: s = "leetcode", wordDict = ["leet", "code"]
+输出: true
+解释: 返回 true 因为 "leetcode" 可以由 "leet" 和 "code" 拼接成。
+```
+
+**示例 2：**
+
+```
+输入: s = "applepenapple", wordDict = ["apple", "pen"]
+输出: true
+解释: 返回 true 因为 "applepenapple" 可以由 "apple" "pen" "apple" 拼接成。
+     注意，你可以重复使用字典中的单词。
+```
+
+**示例 3：**
+
+```
+输入: s = "catsandog", wordDict = ["cats", "dog", "sand", "and", "cat"]
+输出: false
+```
+
+
+
+---
+
+解决思路：<font color='A2CD5A'>**动态规划**</font>
+
+动态规划数组定义：`dp[i]`，表示前`i`个字符是否能在字典中找到
+
+动态转移方程：`dp[i]`
+
+- 遍历前`i - 1`个字符，如果存在一种情况`dp[j]`为`true`，表示前`j`个字符可以在字典中查找到
+  - 判断字符串从`j + 1`(注意字符串的下标依然是`j`)开始到`i`的子串，如果这个子串也可以在字典中查找到，那么说明`dp[i]`为`true`
+
+```c++
+for (int i = 1; i <= s.size(); i++)
+{
+    for (int j = 0; j < i; j++)
+    {
+        if (dp[j] && wordSet.find(s.substr(j, i - j)) != wordSet.end())
+        {
+            dp[i] = true;
+            break;
+        }
+    }
+}
+```
+
+```c++
+#include <string>
+#include <vector>
+#include <unordered_set>
+class Solution 
+{
+public:
+    bool wordBreak(std::string s, std::vector<std::string>& wordDict) 
+    {
+        std::unordered_set<std::string> wordSet(wordDict.begin(), wordDict.end());
+        std::vector<bool> dp(s.size() + 1, false);
+        dp[0] = true;
+
+        for (int i = 1; i <= s.size(); i++)
+        {
+            for (int j = 0; j < i; j++)
+            {
+                if (dp[j] && wordSet.find(s.substr(j, i - j)) != wordSet.end())
+                {
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+        return dp[s.size()];
+    }
+};
+
+int main()
+{
+    std::string s = "leetcode";
+    std::vector<std::string> wordDict = { "leet", "code" };
+    Solution solution;
+    solution.wordBreak(s, wordDict);
+}
+```
+
+# 2025/3/24 [回文子串](https://leetcode.cn/problems/palindromic-substrings/description/)
+
+给你一个字符串 `s` ，请你统计并返回这个字符串中 **回文子串** 的数目。
+
+**回文字符串** 是正着读和倒过来读一样的字符串。
+
+**子字符串** 是字符串中的由连续字符组成的一个序列。
+
+
+
+**示例 1：**
+
+```
+输入：s = "abc"
+输出：3
+解释：三个回文子串: "a", "b", "c"
+```
+
+**示例 2：**
+
+```
+输入：s = "aaa"
+输出：6
+解释：6个回文子串: "a", "a", "a", "aa", "aa", "aaa"
+```
+
+---
+
+解决思路：<font color='A2CD5A'>**中心扩展法**</font>
+
+每一个字符都可以作为回文串的中心，然后以双指针的形式向两侧扩展。
+
+- 如果是字符数为奇数，双指针都以该指针为起始点向两侧扩展
+- 如果字符数为偶数，那么左指针为该元素，右指针为该元素的下一个元素
+
+```c++
+#include <string>
+class Solution 
+{
+private:
+    //int count(std::string s)
+    //{
+    //    int index = (s.size() - 1) / 2;
+    //    int i = index, j = index;
+    //    if (s.size() == 1) return 1;
+    //    if (s.size() % 2 == 0)
+    //    {
+    //        // 偶数
+    //        i = index;
+    //        j = index + 1;
+    //    }
+    //    
+    //    while (i >= 0 && j <= s.size() && s[i] == s[j])
+    //    {
+    //        i--;
+    //        j++;
+    //    }
+    //    return i == -1 && j == s.size();
+    //}
+public:
+    int countSubstrings(std::string s) 
+    {
+        int ret = 0;
+        for (int i = 0; i < s.size(); i++)
+        {
+            // 以 s[i] 为中心
+            for (int j = 0; j <= 1; j++)
+            {
+                int left = i;
+                int right = i + j;
+                while (left >= 0 && right < s.size() && s[left--] == s[right++])
+                {
+                    ret++;
+                }
+            }
+        }
+
+        return ret;
+    }
+};
+```
+
+# 2025/3/24 [目标和](https://leetcode.cn/problems/target-sum/)
+
+
+
+给你一个非负整数数组 `nums` 和一个整数 `target` 。
+
+向数组中的每个整数前添加 `'+'` 或 `'-'` ，然后串联起所有整数，可以构造一个 **表达式** ：
+
+- 例如，`nums = [2, 1]` ，可以在 `2` 之前添加 `'+'` ，在 `1` 之前添加 `'-'` ，然后串联起来得到表达式 `"+2-1"` 。
+
+返回可以通过上述方法构造的、运算结果等于 `target` 的不同 **表达式** 的数目。
+
+ 
+
+**示例 1：**
+
+```
+输入：nums = [1,1,1,1,1], target = 3
+输出：5
+解释：一共有 5 种方法让最终目标和为 3 。
+-1 + 1 + 1 + 1 + 1 = 3
++1 - 1 + 1 + 1 + 1 = 3
++1 + 1 - 1 + 1 + 1 = 3
++1 + 1 + 1 - 1 + 1 = 3
++1 + 1 + 1 + 1 - 1 = 3
+```
+
+**示例 2：**
+
+```
+输入：nums = [1], target = 1
+输出：1
+```
+
+---
+
+解决思路：其实是<font color='A2CD5A'>**背包问题**</font>，但是我还没学到那里，只能先用<font color='A2CD5A'>**深度搜索**</font>来做
+
+```c++
+#include <vector>
+class Solution
+{
+private:
+    void backpack(std::vector<int>& nums, int index, int sum, int target, int& cnt)
+    {
+        if (index == nums.size())
+        {
+            if (sum == target)
+            {
+                cnt++;
+            }
+            return;
+        }
+
+        backpack(nums, index + 1, sum + nums[index], target, cnt);
+        backpack(nums, index + 1, sum - nums[index], target, cnt);
+    }
+public:
+    int findTargetSumWays(std::vector<int>& nums, int target)
+    {
+        int cnt = 0;
+        backpack(nums, 0, 0, target, cnt);
+        return cnt;
+
+    }
+};
+```
+
+# 2025/3/24 [最短无序连续子数组](https://leetcode.cn/problems/shortest-unsorted-continuous-subarray/description/)
+
+给你一个整数数组 `nums` ，你需要找出一个 **连续子数组** ，如果对这个子数组进行升序排序，那么整个数组都会变为升序排序。
+
+请你找出符合题意的 **最短** 子数组，并输出它的长度。
+
+
+
+**示例 1：**
+
+```
+输入：nums = [2,6,4,8,10,9,15]
+输出：5
+解释：你只需要对 [6, 4, 8, 10, 9] 进行升序排序，那么整个表都会变为升序排序。
+```
+
+**示例 2：**
+
+```
+输入：nums = [1,2,3,4]
+输出：0
+```
+
+**示例 3：**
+
+```
+输入：nums = [1]
+输出：0
+```
+
+---
+
+我们首先从左侧找到第一个下降点，然后从右侧找到第一个上升点
+
+例如`nums = [2,3,6,4,1,10,9,15]`第一个下降点就是`6`,右侧的第一个上升点是`9`
+
+找到的区间也就是`[6, 4, 1, 10, 9]`
+
+但是对于这个区间升序排列了之后，会变成`[2, 3, 1, 4, 6, 9, 10, 15]`
+
+实际上应该把左侧的2和3也全部纳入到区间之中然后升序排列
+
+所以我们的目标就明确了，找到区间的时候，我们还需要向两侧扩展
+
+- 如果左侧的元素大于区间中的最小元素，需要扩展区间
+- 如果右侧的元素小于区间中的最小元素，也需要扩展区间
+
+```c++
+#include <vector>
+
+class Solution
+{
+public:
+    int findUnsortedSubarray(std::vector<int>& nums)
+    {
+        if (nums.size() <= 1) return 0;
+
+        int left = 0;
+        int right = nums.size() - 1;
+
+        while (left < nums.size() - 1 && nums[left] <= nums[left + 1])
+        {
+            left++;
+        }
+        if (left == nums.size() - 1) return 0;
+
+        while (right > 0 && nums[right] >= nums[right - 1])
+        {
+            right--;
+        }
+
+        int minValue = *std::min_element(nums.begin() + left, nums.begin() + right + 1);
+        int maxValue = *std::max_element(nums.begin() + left, nums.begin() + right + 1);
+        while (left > 0 && nums[left - 1] > minValue)
+        {
+            left--;
+        }
+        while (right < nums.size() - 1 && nums[right + 1] < maxValue)
+        {
+            right++;
+        }
+
+        return right - left + 1;
+    }
+};
+//
+//int main()
+//{
+//    std::vector<int> nums = {2, 3, 1, 4, 5};
+//    Solution solution;
+//    solution.findUnsortedSubarray(nums);
+//}
+```
+
+# 2025/3/24 [搜索二维矩阵 II](https://leetcode.cn/problems/search-a-2d-matrix-ii/description/)
+
+编写一个高效的算法来搜索 `*m* x *n*` 矩阵 `matrix` 中的一个目标值 `target` 。该矩阵具有以下特性：
+
+- 每行的元素从左到右升序排列。
+- 每列的元素从上到下升序排列。
+
+ 
+
+**示例 1：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/11/25/searchgrid2.jpg)
+
+```
+输入：matrix = [[1,4,7,11,15],[2,5,8,12,19],[3,6,9,16,22],[10,13,14,17,24],[18,21,23,26,30]], target = 5
+输出：true
+```
+
+**示例 2：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/11/25/searchgrid.jpg)
+
+```
+输入：matrix = [[1,4,7,11,15],[2,5,8,12,19],[3,6,9,16,22],[10,13,14,17,24],[18,21,23,26,30]], target = 20
+输出：false
+```
+
+---
+
+解决思路：<font color='A2CD5A'>**不是二分查找**</font>
+
+这道题有人想拆分成一维矩阵来做，其实是有问题的，因为无法保证完全有序。
+
+如果将第二行的数据直接接在第一行后面，无法保证有序，同理列也是。
+
+应该使用这道题的特殊性，也就是
+
+- 每行的元素从左到右升序排列。
+- 每列的元素从上到下升序排列。
+
+选择合适的位置开始搜索，应该保证每次只搜索一个方向，要么行要么列，因此我们选择从右上角开始搜索。
+
+- 如果从左上角开始搜索，没有比其小的数，更大的数可以向下搜索也可以向上搜索
+- 如果从矩阵任一内部元素开始搜索，可以向任意方向搜索
+- 右下角同理
+
+因此我们选择右上角进行搜索
+
+- 如果当前元素＞我们需要寻找的元素，那么应该向左侧搜索
+- 如果当前元素＜我们需要寻找的元素，那么应该向下搜索
+
+```c++
+#include <vector>
+#include <iostream>
+class Solution
+{
+public:
+    bool searchMatrix(std::vector<std::vector<int>>& matrix, int target)
+    {
+        int rows = matrix.size();
+        int cols = matrix[0].size();
+
+        int row = 0;
+        int col = cols - 1;
+
+        while (row < rows && col >= 0)
+        {
+            if (matrix[row][col] == target)
+            {
+                return true;
+            }
+            else if (matrix[row][col] > target)
+            {
+                col--;
+            }
+            else
+            {
+                row++;
+            }
+        }
+
+        return false;
+
+    }
+};
+```
+
+# 2025/3/24 [字母异位词分组](https://leetcode.cn/problems/group-anagrams/description/)
+
+给你一个字符串数组，请你将 **字母异位词** 组合在一起。可以按任意顺序返回结果列表。
+
+**字母异位词** 是由重新排列源单词的所有字母得到的一个新单词。
+
+ 
+
+**示例 1:**
+
+```
+输入: strs = ["eat", "tea", "tan", "ate", "nat", "bat"]
+输出: [["bat"],["nat","tan"],["ate","eat","tea"]]
+```
+
+**示例 2:**
+
+```
+输入: strs = [""]
+输出: [[""]]
+```
+
+**示例 3:**
+
+```
+输入: strs = ["a"]
+输出: [["a"]]
+```
+
+---
+
+解决思路：<font color='A2CD5A'>**哈希**</font>
+
+对于"ate","eat","tea"三个元素来说，其排序之后的元素是完全相同的，都是"aet"
+
+因此我们只需要按照下列方式来存储即可
+
+```c++
+map["aet"] = {"ate","eat","tea"}
+```
+
+
+
+```c++
+#include <vector>
+#include <string>
+#include <unordered_map>
+#include <algorithm>
+class Solution
+{
+public:
+    std::vector<std::vector<std::string>> groupAnagrams(std::vector<std::string>& strs)
+    {
+        std::unordered_map<std::string, std::vector<std::string>> map;
+        for (std::string str : strs)
+        {
+            std::string value = str;
+            std::string key = str;
+            std::sort(key.begin(), key.end());
+
+            map[key].push_back(value);
+        }
+
+        std::vector<std::vector<std::string>> result;
+        for (auto entry : map)
+        {
+            result.push_back(entry.second);
+        }
+        return result;
+    }
+};
+```
+
+2025/3/24 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
