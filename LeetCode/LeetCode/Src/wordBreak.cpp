@@ -24,11 +24,11 @@ public:
         return dp[s.size()];
     }
 };
-
-int main()
-{
-    std::string s = "leetcode";
-    std::vector<std::string> wordDict = { "leet", "code" };
-    Solution solution;
-    solution.wordBreak(s, wordDict);
-}
+//
+//int main()
+//{
+//    std::string s = "leetcode";
+//    std::vector<std::string> wordDict = { "leet", "code" };
+//    Solution solution;
+//    solution.wordBreak(s, wordDict);
+//}
