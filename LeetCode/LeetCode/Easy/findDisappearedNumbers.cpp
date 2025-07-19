@@ -31,11 +31,11 @@ public:
     }
 
 };
-
-int main()
-{
-    Solution solution;
-    std::vector<int> nums = { 4,3,2,7,7,2,3,1 };
-    solution.findDisappearedNumbers(nums);
-
-}
+//
+//int main()
+//{
+//    Solution solution;
+//    std::vector<int> nums = { 4,3,2,7,7,2,3,1 };
+//    solution.findDisappearedNumbers(nums);
+//
+//}

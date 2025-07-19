@@ -1,28 +1,28 @@
 #include <vector>
-
-//Definition for singly-linked list.
-struct ListNode {
-    int val;
-    ListNode *next;
-    ListNode() : val(0), next(nullptr) {}
-    ListNode(int x) : val(x), next(nullptr) {}
-    ListNode(int x, ListNode *next) : val(x), next(next) {}
-};
-
-class Solution
+class Solution 
 {
 public:
-    ListNode* reverseList(ListNode* head)
+    int majorityElement(std::vector<int>& nums)
     {
-        ListNode* pre = nullptr;
-        ListNode* current = head;
-        while (current)
+        int candicate = INT_MIN;
+        int count = 0;
+        for (auto v : nums)
         {
-            ListNode* next = current->next;
-            current->next = pre;
-            pre = current;
-            current = next;
+            if (count == 0)
+            {
+                candicate = v;
+                count = 1;
+            }
+            else if (candicate != v)
+            {
+                count--;
+            }
+            else
+            {
+                count++;
+            }
         }
-        return pre;
+
+        return candicate;
     }
 };
